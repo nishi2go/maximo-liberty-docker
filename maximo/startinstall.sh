@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Watch and wait the DM process and database and web server
+# Clear old deployment files first
+SMP="/opt/IBM/SMP"
+
+if [ -f "$MAXIMO_DIR/maximo.properties" ]
+then
+  rm "$MAXIMO_DIR/maximo.properties"
+fi
+
+# Watch and wait the database
 wait-for-it.sh $DB_HOST_NAME:$DB_PORT -t 0 -q -- echo "Database is up"
 
-DB_FQDN=`ping $DB_HOST_NAME -c 1 | head -n 2 | tail -n 1 | cut -f 4 -d ' ' | tr -d ':'`
-WAS_DM_FQDN=`ping $DMGR_HOST_NAME -c 1 | head -n 2 | tail -n 1 | cut -f 4 -d ' ' | tr -d ':'`
+if [[ ! -z "$ENABLE_DEMO_DATA" && "$ENABLE_DEMO_DATA" = "yes" ]]
+then
+  DEMO_DATA="-deployDemoData"
+fi
 
 #copy skel files
 CONFIG_FILE=/opt/maximo-config.properties
 if [ -f $CONFIG_FILE ]
 then
   echo "Maximo has already configured."
-
+else
   cat > $CONFIG_FILE <<EOF
 MW.Operation=Configure
 # Maximo Configuration Parameters
@@ -41,12 +51,13 @@ mxe.db.user=maximo
 mxe.db.password=$DB_MAXIMO_PASSWORD
 mxe.db.schemaowner=maximo
 mxe.useAppServerSecurity=0
-mxe.db.url=jdbc:db2://$DB_FQDN:50005/maxdb76
 
 # Database Configuration Parameters
+Database.UserSpecifiedJDBCURL=jdbc:db2://$DB_HOST_NAME:$DB_PORT/$MAXDB
+Database.AutomateConfig=false
 Database.Vendor=DB2
 Database.DB2.DatabaseName=$MAXDB
-Database.DB2.ServerHostName=$DB_FQDN
+Database.DB2.ServerHostName=$DB_HOST_NAME
 Database.DB2.ServerPort=$DB_PORT
 Database.DB2.DataTablespaceName=MAXDATA
 Database.DB2.TempTablespaceName=MAXTEMP
@@ -56,25 +67,25 @@ Database.DB2.TextSearchEnabled=false
 # WebSphere Configuration Parameters
 ApplicationServer.Vendor=WebSphere
 WAS.ND.AutomateConfig=false
-
-WAS.InstallLocation=/opt/IBM/WebSphere/AppServer
-PLG.InstallLocation=/opt/IBM/WebSphere/Plugins
-WCT.InstallLocation=/opt/IBM/WebSphere/Toolbox
-
 IHS.AutomateConfig=false
-
 WAS.ClusterAutomatedConfig=false
 WAS.DeploymentManagerRemoteConfig=false
 EOF
 
   # Run Configuration Tool
-  /opt/IBM/SMP/ConfigTool/scripts/reconfigurePae.sh -action deployConfiguration \
-      -inputfile $CONFIG_FILE
-
-  exit
+  $SMP/ConfigTool/scripts/reconfigurePae.sh -action deployConfiguration \
+    -bypassJ2eeValidation -inputfile $CONFIG_FILE $DEMO_DATA
 fi
 
-/opt/IBM/SMP/ConfigTool/scripts/reconfigurePae.sh -action updateApplication \
-    -updatedb -enableSkin "$SKIN" -enableEnhancedNavigation
+INSTALL_PROPERTIES=$SMP/etc/install.properties
+sed -ie "s/^ApplicationServer.Vendor=.*/ApplicationServer.Vendor=WebSphereLiberty/" "$INSTALL_PROPERTIES"
 
-IHS.HTTPPort=$WEB_SERVER_PORT
+$SMP/ConfigTool/scripts/reconfigurePae.sh -action updateApplicationDBLite \
+  -updatedb -enableSkin "$SKIN" -enableEnhancedNavigation
+
+# Deploy WAS.UserName and WAS.Password properties
+cd $SMP/maximo/tools/maximo/internal && ./runscriptfile.sh -cliberty -fliberty
+
+# Fix IP address issue
+MAXIMO_PROPERTIES=$SMP/maximo/applications/maximo/properties/maximo.properties
+cp $MAXIMO_PROPERTIES $MAXIMO_DIR && chmod 444 $MAXIMO_DIR/maximo.properties

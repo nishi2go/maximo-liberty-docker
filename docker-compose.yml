@@ -1,71 +1,194 @@
-version: '3'
+version: '3.6'
 services:
   maxdb:
-    image: maximo/db2
+    image: maximo-liberty/db2
     hostname: maxdb
     environment:
-    - CTGINST1_PASSWORD=changeit
-    - CTGFENC1_PASSWORD=changeit
-    - DASUSR1_PASSWORD=changeit
-    - MAXIMO_PASSWORD=changeit
+      - CTGINST1_PASSWORD=changeit
+      - CTGFENC1_PASSWORD=changeit
+      - DASUSR1_PASSWORD=changeit
+      - MAXIMO_PASSWORD=changeit
+      - DB_PORT=50005
     networks:
-    - maxnet
-    privileged: true
+      - backend
     volumes:
-    - maxdb76:/home/ctginst1/ctginst1
-    - vardb2:/var/db2
-  maxdmgr:
-    image: maximo/maxdmgr
-    hostname: maxdmgr
-    ports:
-    - 9043:9043
-    environment:
-    - DMGR_ADMIN_PASSWORD=changeit
-    networks:
-    - maxnet
-  maxapps:
-    image: maximo/maxapps
-    hostname: maxapps
-    environment:
-    - DMGR_ADMIN_PASSWORD=changeit
-    networks:
-    - maximo
-    depends_on:
-      - maxdmgr
-      - maxweb
-    networks:
-    - maxnet
-  maxweb:
-    image: maximo/maxweb
-    hostname: maxweb
-    environment:
-    - DMGR_ADMIN_PASSWORD=changeit
-    ports:
-    - 80:80
-    depends_on:
-      - maxdmgr
-    networks:
-    - maxnet
+      - type: volume
+        source: maxdb76
+        target: /data
+      - type: bind
+        source: ./backup
+        target: /backup
+    ulimits:
+      nproc: 8192
+      nofile: 65535
+      fsize: -1
+
   maximo:
-    image: maximo/maximo
+    image: maximo-liberty/maximo
     hostname: maximo
     environment:
-    - DMGR_ADMIN_PASSWORD=changeit
-    - DB_MAXIMO_PASSWORD=changeit
-    - MXINTADM_PASSWORD=changeit
-    - MAXADMIN_PASSWORD=changeit
-    - MAXREG_PASSWORD=changeit
-    networks:
-    - maximo
+      - MXINTADM_PASSWORD=changeit
+      - MAXADMIN_PASSWORD=changeit
+      - MAXREG_PASSWORD=changeit
+      - BASE_LANG=en
+      #- ADD_LANGS=de,fr,ja
+      - ADMIN_EMAIL_ADDRESS=root@localhost
+      - SMTP_SERVER_HOST_NAME=localhost
+      - MAXDB=MAXDB76
+      - DB_HOST_NAME=maxdb
+      - DB_PORT=50005
+      - DB_MAXIMO_PASSWORD=changeit
+      - SKIN=iot18
+      - ENABLE_DEMO_DATA=no
     depends_on:
-     - maxdb
-     - maxapps
-     - maxweb
+      - maxdb
     networks:
-    - maxnet
+      - backend
+    volumes:
+      - maximo:/maximo
+
+  maximo-ui:
+    image: maximo-liberty/maximo-ui
+    environment:
+      - LICENSE=accept
+      - ADMIN_USER_NAME=admin
+      - ADMIN_USER_NAME=changeit
+      - JMS_SERVER_HOST=jmsserver
+      - JMS_SERVER_PORT=9011
+    depends_on:
+      - maxdb
+      - maximo
+      - jmsserver
+    networks:
+      frontend:
+        aliases:
+          - maximo-ui
+      backend:
+    volumes:
+      - maximo:/maximo
+
+  maximo-cron:
+    image: maximo-liberty/maximo-cron
+    environment:
+      - LICENSE=accept
+      - ADMIN_USER_NAME=admin
+      - ADMIN_PASSWORD=changeit
+      - JMS_SERVER_HOST=jmsserver
+      - JMS_SERVER_PORT=9011
+    depends_on:
+      - maxdb
+      - maximo
+      - jmsserver
+    networks:
+      frontend:
+      backend:
+    volumes:
+      - maximo:/maximo
+
+  # maximo-api:
+  #   image: maximo-liberty/maximo-api
+  #   environment:
+  #     - ADMIN_USER_NAME=admin
+  #     - ADMIN_PASSWORD=changeit
+  #     - JMS_SERVER_HOST=jmsserver
+  #     - JMS_SERVER_PORT=9011
+  #     - LICENSE=accept
+  #   depends_on:
+  #     - maxdb
+  #     - maximo
+  #     - jmsserver
+  #   networks:
+  #     frontend:
+  #       aliases:
+  #         - maximo-api
+  #     backend:
+  #   volumes:
+  #     - maximo:/maximo
+
+  # maximo-report:
+  #   image: maximo-liberty/maximo-report
+  #   environment:
+  #     - ADMIN_USER_NAME=admin
+  #     - ADMIN_PASSWORD=changeit
+  #     - JMS_SERVER_HOST=jmsserver
+  #     - JMS_SERVER_PORT=9011
+  #     - LICENSE=accept
+  #   depends_on:
+  #     - maxdb
+  #     - maximo
+  #     - jmsserver
+  #   networks:
+  #     frontend:
+  #       aliases:
+  #         - maximo-report
+  #     backend:
+  #   volumes:
+  #     - maximo:/maximo
+  #
+  # maximo-mea:
+  #   image: maximo-liberty/maximo-mea
+  #   environment:
+  #     - ADMIN_USER_NAME=admin
+  #     - ADMIN_PASSWORD=changeit
+  #     - JMS_SERVER_HOST=jmsserver
+  #     - JMS_SERVER_PORT=9011
+  #     - LICENSE=accept
+  #   depends_on:
+  #     - maxdb
+  #     - maximo
+  #     - jmsserver
+  #   networks:
+  #     frontend:
+  #       aliases:
+  #         - maximo-mea
+  #     backend:
+  #   volumes:
+  #     - maximo:/maximo
+  #
+  # maximo-jmsconsumer:
+  #   image: maximo-liberty/maximo-jmsconsumer
+  #   environment:
+  #     - ADMIN_USER_NAME=admin
+  #     - ADMIN_PASSWORD=changeit
+  #     - JMS_SERVER_HOST=jmsserver
+  #     - JMS_SERVER_PORT=9011
+  #     - LICENSE=accept
+  #   depends_on:
+  #     - maxdb
+  #     - maximo
+  #     - jmsserver
+  #   networks:
+  #     frontend:
+  #       aliases:
+  #         - maximo-jmsconsumer
+  #     backend:
+  #   volumes:
+  #     - maximo:/maximo
+
+  jmsserver:
+    image: maximo-liberty/jmsserver
+    hostname: jmsserver
+    environment:
+      - JMS_SERVER_PORT=9011
+      - JMS_SERVER_SSL_PORT=9012
+    ports:
+      - 9011:9011
+      - 9012:9012
+    networks:
+      - frontend
+  frontend-proxy:
+    image: maximo-liberty/frontend-proxy
+    ports:
+      - 80:80
+    depends_on:
+      - maximo-ui
+    networks:
+      - frontend
+
 networks:
-  maxnet:
+  frontend:
+  backend:
 volumes:
   maxdb76:
-  vardb2:
-  pae76:
+  # Shared directory for liberty deployment files
+  maximo:

@@ -17,8 +17,45 @@ CHECK_DIR=$1
 PACKAGE_LIST=packages.list
 MAXIMO_VER="${MAXIMO_VER:-7.6.1}"
 IM_VER="${IM_VER:-1.8.8}"
-WAS_VER="${WAS_VER:-9.0.0.7}"
+WAS_VER="${WAS_VER:-18.0.0.4}"
 DB2_VER="${DB2_VER:-11.1.3}"
+PROXY_VER="${PROXY_VER:-1.8}"
+
+DOCKER="${DOCKER_CMD:docker}"
+
+BUILD_NETWORK_NAME="maximo-liberty-build"
+IMAGE_SERVER_NAME="liberty-images"
+IMAGE_SERVER_HOST_NAME="liberty-images"
+NAME_SPACE="maximo-liberty"
+
+REMOVE=0
+QUIET=-q
+
+# Usage: remove "tag name" "version" "product name"
+function remove {
+  image_id=`$DOCKER images -q --no-trunc $NAME_SPACE/$1:$2`
+  if [[ ! -z "$image_id" ]]; then
+    echo "An old $3 image exists. Remove it."
+    container_ids=`$DOCKER ps -aq --no-trunc -f ancestor=$image_id`
+    if [[ ! -z "$container_ids" ]]; then
+      $DOCKER rm -f $container_ids
+    fi
+    $DOCKER rmi -f "$image_id"
+  fi
+}
+
+# Usage: build "tag name" "version" "target directory name" "product name"
+function build {
+  echo "Start to build $4 image"
+  $DOCKER build $QUIET $5 --rm $EXTRA_BUILD_ARGS -t $NAME_SPACE/$1:$2 -t $NAME_SPACE/$1:latest --network $BUILD_NETWORK_NAME $3
+
+  exists=`$DOCKER images -q --no-trunc $NAME_SPACE/$1:$2`
+  if [[ -z "$exists" ]]; then
+    echo "Failed to create $4 image."
+    exit 2
+  fi
+  echo "Completed $4 image creation."
+}
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -34,11 +71,21 @@ while [[ $# -gt 0 ]]; do
         shift
         CHECK_DIR="$1"
         ;;
+      -r | --remove )
+        REMOVE=1
+        ;;
+      -r | --remove-only )
+        REMOVE=1
+        REMOVE_ONLY=1
+        ;;
       -h | --help )
         SHOW_HELP=1
         ;;
       -g )
         GEN_PKG_LIST=1
+        ;;
+      -v | --verbose )
+        QUIET=""
         ;;
     esac
     shift
@@ -50,7 +97,9 @@ Usage: build.sh [DIR] [OPTION]...
 
 -c | --check            Check required packages
 -C | --deepcheck        Check and compare checksum of required packages
+-r | --remove           Remove images when an image exists in repository
 -d | --check-dir [DIR]  The directory for validating packages (Docker for Windows only)
+-v | --verbose          Output verbosity in docker build
 -h | --help             Show this help text
 EOF
   exit 1
@@ -76,118 +125,100 @@ if [[ $CHECK -eq 1 ]]; then
      exit 9
    fi
 
-   res=`md5sum $CHECK_DIR/$file`
-   if [[ $GEN_PKG_LIST -eq 1 ]]; then
-     echo "$file,$res" >> $PACKAGE_LIST.out
-   elif [[ "$md5sum" == "$res" ]]; then
-     echo " MD5 does not match."
-     exit 9
+   if [[ $DEEP_CHECK -eq 1 ]]; then
+     res=`md5sum $CHECK_DIR/$file`
+     if [[ $GEN_PKG_LIST -eq 1 ]]; then
+       echo "$file,$res" >> $PACKAGE_LIST.out
+     elif [[ "$md5sum" == "$res" ]]; then
+       echo " MD5 does not match."
+       exit 9
+     fi
    fi
 
    echo " Found."
   done < $PACKAGE_LIST
 fi
 
-echo "Start to build"
+if [[ $REMOVE -eq 1 ]]; then
+  echo "Remove old images..."
+  remove "db2" "$DB2_VER" "IBM Db2 Advanced Workgroup Server Edition"
+  remove "maximo" "$MAXIMO_VER" "IBM Maximo Asset Management"
+  remove "jmsserver" "$WAS_VER" "IBM WebSphere Application Server Liberty JMS server"
+  remove "maximo-ui" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo UI"
+  remove "maximo-api" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo API"
+  remove "maximo-cron" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo Crontask"
+  remove "maximo-report" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo Report Server"
+  remove "maximo-mea" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo MEA"
+  remove "maximo-jmsconsumer" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
+  remove "liberty" "$WAS_VER" "IBM WebSphere Application Server Liberty base"
+  remove "ibmim" "$IM_VER" "IBM Installation Manager"
+  remove "frontend-proxy" "$PROXY_VER" "Frontend Proxy Server"
 
-# Create a newwork if it does not exist
-if [[ -z `docker network ls -q --no-trunc -f "name=^build$"` ]]; then
+  if [[ $REMOVE_ONLY -eq 1 ]]; then
+    exit
+  fi
+fi
+
+echo "Start to build..."
+
+# Create a newwork for build if it does not exist
+if [[ -z `$DOCKER network ls -q --no-trunc -f "name=^${BUILD_NETWORK_NAME}$"` ]]; then
   echo "Docker network build does not exist. Start to make it."
-  docker network create build
-  docker network ls -f "name=^build$"
+  $DOCKER network create ${BUILD_NETWORK_NAME}
+  $DOCKER network ls -f "name=^${BUILD_NETWORK_NAME}$"
 fi
 
 # Remove and run a container for HTTP server
-images_exists=`docker ps -aq --no-trunc -f "name=^/images$"`
+images_exists=`$DOCKER ps -aq --no-trunc -f "name=^/${IMAGE_SERVER_NAME}$"`
 if [[ ! -z "$images_exists" ]]; then
-    echo "Docker container image has been started. Remove it."
-    docker rm -f "$images_exists"
+    echo "Docker container ${IMAGE_SERVER_NAME} has been started. Remove it."
+    $DOCKER rm -f "$images_exists"
 fi
 
-echo "Start a container - image"
-docker run --rm --name images -h images --network build -v "$IMAGE_DIR":/usr/share/nginx/html:ro -d nginx
-docker ps -f "name=^/images"
+echo "Start a container - ${IMAGE_SERVER_NAME}"
+$DOCKER run --rm --name ${IMAGE_SERVER_NAME} -h ${IMAGE_SERVER_HOST_NAME} \
+ --network ${BUILD_NETWORK_NAME} -v "${IMAGE_DIR}":/usr/share/nginx/html:ro -d nginx
+$DOCKER ps -f "name=^/${IMAGE_SERVER_NAME}"
 
-db2_exists=`docker images maximo/db2:$DB2_VER`
-if [[ ! -z "$db2_exists" ]]; then
-  echo "An old Db2 image exists. Remove it."
-  docker rmi maximo/db2:$DB2_VER
-  docker rmi maximo/db2:latest
-fi
+sleep 1
 
-echo "Start to build a Db2 image"
-docker build --rm -t maximo/db2:$DB2_VER -t maximo/db2:latest --network build maxdb
-docker images maximo/db2
+# Build IBM Installation Manager image
+build "ibmim" "$IM_VER" "ibmim" "IBM Installation Manager"
 
-im_exists=`docker images maximo/ibmim:$IM_VER`
-if [[ ! -z "$im_exists" ]]; then
-  echo "An old IBM Installation Manager image exists. Remove it."
-  docker rmi maximo/ibmim:$IM_VER
-  docker rmi maximo/ibmim:latest
-fi
+# Build IBM Maximo Asset Management image
+build "maximo" "$MAXIMO_VER" "maximo" "IBM Maximo Asset Management"
 
-echo "Start to build an IBM Installation Manager image"
-docker build --rm -t maximo/ibmim:$IM_VER -t maximo/ibmim:latest --network build ibmim
-docker images maximo/ibmim
+# Build IBM Db2 Advanced Workgroup Edition image
+build "db2" "$DB2_VER" "maxdb" "IBM Db2 Advanced Workgroup Server Edition"
 
-was_exists=`docker images maximo/maxwas:$WAS_VER`
-if [[ ! -z "$was_exists" ]]; then
-  echo "An old WebSphere Application Server image exists. Remove it."
-  docker rmi maximo/maxwas:$WAS_VER
-  docker rmi maximo/maxwas:latest
-fi
+# Build IBM WebSphere Liberty base image
+build "liberty" "$WAS_VER" "liberty" "IBM WebSphere Application Server Liberty base"
 
-echo "Start to build a WebSphere Applicatoin Server image"
-docker build --rm -t maximo/maxwas:$WAS_VER -t maximo/maxwas:latest --network build maxwas
-docker images maximo/maxwas
+# Build IBM WebSphere Liberty JMS server image
+build "jmsserver" "$WAS_VER" "jmsserver" "IBM WebSphere Application Server Liberty JMS server"
 
-dmgr_exists=`docker images maximo/maxdmgr:$WAS_VER`
-if [[ ! -z "$dmgr_exists" ]]; then
-  echo "An old WebSphere Application Server Deployment Manager image exists. Remove it."
-  docker rmi maximo/maxdmgr:$WAS_VER
-  docker rmi maximo/maxdmgr:latest
-fi
+# Build IBM WebSphere Liberty for Maximo UI image
+build "maximo-ui" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo UI" "--build-arg maximoapp=maximo-ui"
 
-echo "Start to build a WebSphere Applicatoin Server Deployment Manager image"
-docker build --rm -t maximo/maxdmgr:$WAS_VER -t maximo/maxdmgr:latest --network build maxdmgr
-docker images maximo/maxdmgr
+# Build IBM WebSphere Liberty for Maximo Crontask image
+build "maximo-cron" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo Crontask" "--build-arg maximoapp=maximo-cron"
 
-app_exists=`docker images maximo/maxapps:$WAS_VER`
-if [[ ! -z "$app_exists" ]]; then
-  echo "An old WebSphere Application Server Node image exists. Remove it."
-  docker rmi maximo/maxapps:$WAS_VER
-  docker rmi maximo/maxapps:latest
-fi
+# Build IBM WebSphere Liberty for Maximo API image
+build "maximo-api" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo API" "--build-arg maximoapp=maximo-api"
 
-echo "Start to build a WebSphere Applicatoin Server Node image"
-docker build --rm -t maximo/maxapps:$WAS_VER -t maximo/maxapps:latest --network build maxapps
-docker images maximo/maxapps
+# Build IBM WebSphere Liberty for Maximo Report Server image
+build "maximo-report" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo Report" "--build-arg maximoapp=maximo-report"
 
-web_exists=`docker images maximo/maxweb:$WAS_VER`
-if [[ ! -z "$web_exists" ]]; then
-  echo "An old WebSphere Application Server Web Server image exists. Remove it."
-  docker rmi maximo/maxweb:$WAS_VER
-  docker rmi maximo/maxweb:latest
-fi
+# Build IBM WebSphere Liberty for Maximo MEA image
+build "maximo-mea" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo MEA" "--build-arg maximoapp=maximo-mea"
 
-echo "Start to build a WebSphere Applicatoin Server Web Server image"
-docker build --rm -t maximo/maxweb:$WAS_VER -t maximo/maxweb:latest --network build maxweb
-docker images maximo/maxweb
+# Build IBM WebSphere Liberty for Maximo Report Server image
+build "maximo-jmsconsumer" "$MAXIMO_VER" "maxapp" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer" "--build-arg maximoapp=maximo-jmsconsumer"
 
-maximo_exists=`docker images maximo/maximo:$MAXIMO_VER`
-if [[ ! -z "$maximo_exists" ]]; then
-  echo "An old Maximo Asset Management image exists. Remove it."
-  docker rmi maximo/maximo:$MAXIMO_VER
-  docker rmi maximo/maximo:latest
-fi
+# Build Frontend Proxy Server
+build "frontend-proxy" "$PROXY_VER" "frontend-proxy" "Frontend Proxy Server"
 
-echo "Start to build a Maximo Asset Management image"
-docker build --rm -t maximo/maximo:$MAXIMO_VER -t maximo/maximo:latest --network build maximo
-docker images maximo/maximo
+echo "Stop the images container - ${IMAGE_SERVER_NAME}"
+$DOCKER stop ${IMAGE_SERVER_NAME}
 
-#docker build -t maximo/maximo:$MAXIMO_VER -t maximo/maximo:latest --network build maximo
-
-echo "Stop the images container."
-docker stop images
-
-echo "Done."
+echo "Done"
