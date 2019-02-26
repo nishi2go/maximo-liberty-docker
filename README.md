@@ -116,7 +116,7 @@ Procedures:
 5. Run containers by using the Docker Compose file. (follow above instructions)
 6. Take a backup from the maxdb service by using a backup tool.
     ```bash
-    docker-compose exec maxdb /work/backup.sh maxdb76 /backup
+    docker-compose exec maximo-docker-liberty_maxdb_1 /work/backup.sh maxdb76 /backup
     ```
     Note: Backup image must be only one in the directory. Backup task must fail when more than two images in it.
 
