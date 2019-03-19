@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-IMAGE_DIR=$1
-CHECK_DIR=$1
+IMAGE_DIR=
+CHECK_DIR=
+JMS_OPT="no"
 PACKAGE_LIST=packages.list
 MAXIMO_VER="${MAXIMO_VER:-7.6.1}"
 IM_VER="${IM_VER:-1.8.8}"
@@ -29,6 +30,7 @@ IMAGE_SERVER_HOST_NAME="liberty-images"
 NAME_SPACE="maximo-liberty"
 
 REMOVE=0
+JMS_OPT="yes"
 QUIET=-q
 
 # Usage: remove "tag name" "version" "product name"
@@ -71,10 +73,13 @@ while [[ $# -gt 0 ]]; do
         shift
         CHECK_DIR="$1"
         ;;
+      -J | --disable-jms )
+        JMS_OPT="no"
+        ;;
       -r | --remove )
         REMOVE=1
         ;;
-      -r | --remove-only )
+      -R | --remove-only )
         REMOVE=1
         REMOVE_ONLY=1
         ;;
@@ -87,17 +92,23 @@ while [[ $# -gt 0 ]]; do
       -v | --verbose )
         QUIET=""
         ;;
+      * )
+        IMAGE_DIR="$1"
+        if [[ -z "$CHECK_DIR" ]]; then
+          CHECK_DIR=$IMAGE_DIR
+        fi
     esac
     shift
 done
 
 if [[ $SHOW_HELP -eq 1 || -z "$IMAGE_DIR" ]]; then
   cat <<EOF
-Usage: build.sh [DIR] [OPTION]...
+Usage: build.sh [OPTIONS] [DIR]
 
 -c | --check            Check required packages
 -C | --deepcheck        Check and compare checksum of required packages
 -r | --remove           Remove images when an image exists in repository
+-J | --disable-jms      Disable JMS configurations in application servers
 -d | --check-dir [DIR]  The directory for validating packages (Docker for Windows only)
 -v | --verbose          Output verbosity in docker build
 -h | --help             Show this help text
@@ -144,12 +155,12 @@ if [[ $REMOVE -eq 1 ]]; then
   remove "db2" "$DB2_VER" "IBM Db2 Advanced Workgroup Server Edition"
   remove "maximo" "$MAXIMO_VER" "IBM Maximo Asset Management"
   remove "jmsserver" "$WAS_VER" "IBM WebSphere Application Server Liberty JMS server"
-  remove "maximo-ui" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo UI"
-  remove "maximo-api" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo API"
-  remove "maximo-cron" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo Crontask"
-  remove "maximo-report" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo Report Server"
-  remove "maximo-mea" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo MEA"
-  remove "maximo-jmsconsumer" "$WAS_VER" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
+  remove "maximo-ui" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo UI"
+  remove "maximo-api" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo API"
+  remove "maximo-cron" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo Crontask"
+  remove "maximo-report" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo Report Server"
+  remove "maximo-mea" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo MEA"
+  remove "maximo-jmsconsumer" "$MAXIMO_VER" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
   remove "liberty" "$WAS_VER" "IBM WebSphere Application Server Liberty base"
   remove "ibmim" "$IM_VER" "IBM Installation Manager"
   remove "frontend-proxy" "$PROXY_VER" "Frontend Proxy Server"
@@ -186,7 +197,7 @@ sleep 1
 build "ibmim" "$IM_VER" "ibmim" "IBM Installation Manager"
 
 # Build IBM Maximo Asset Management image
-build "maximo" "$MAXIMO_VER" "maximo" "IBM Maximo Asset Management"
+build "maximo" "$MAXIMO_VER" "maximo" "IBM Maximo Asset Management" "--build-arg enablejms=$JMS_OPT"
 
 # Build IBM Db2 Advanced Workgroup Edition image
 build "db2" "$DB2_VER" "maxdb" "IBM Db2 Advanced Workgroup Server Edition"
