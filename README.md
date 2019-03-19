@@ -39,12 +39,14 @@ You can use a tool for building docker images by using the build tool.
 
 Usage:
 ```
-Usage: build.sh [DIR] [OPTION]...
+Usage: build.sh [OPTIONS] [DIR]
 
 -c | --check            Check required packages
 -C | --deepcheck        Check and compare checksum of required packages
 -r | --remove           Remove images when an image exists in repository
+-J | --disable-jms      Disable JMS configurations in application servers
 -d | --check-dir [DIR]  The directory for validating packages (Docker for Windows only)
+-v | --verbose          Output verbosity in docker build
 -h | --help             Show this help text
 ```
 
@@ -60,17 +62,17 @@ Procedures:
     ```
 4. Run build tool
    ```bash
-   bash build.sh [Image directory] [-c] [-C] [-r]
+   bash build.sh [-c] [-C] [-r] [Image directory]
    ```
 
    Example:
    ```bash
-   bash build.sh /images -c -r
+   bash build.sh -c -r /images
    ```
 
    Example for Docker for Windows:
    ```bash
-   bash build.sh "C:/images" -c -r -d /images
+   bash build.sh -c -r -d /images "C:/images"
    ```
    Note 1: This script works on Windows Subsystem on Linux.<br>
    Note 2: md5sum is required. For Mac, install it manually - https://raamdev.com/2008/howto-install-md5sum-sha1sum-on-mac-os-x/
