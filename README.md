@@ -1,5 +1,4 @@
 # Building and deploying an IBM Maximo Asset Management V7.6.1 with Liberty image to Docker
-------------------------------------------------------------------------------------
 
 **This is an experimental version. Please report issues if you have some difficulties.**
 
@@ -10,7 +9,6 @@ Before you start, please check the official guide in technotes first. [Maximo As
 ![Componets of Docker Images](https://raw.githubusercontent.com/nishi2go/maximo-liberty-docker/master/maximo-liberty-docker.svg?sanitize=true)
 
 ## Required packages
---------------------
 
 * IBM Installation Manager binaries from [Installation Manager 1.8 download documents](http://www-01.ibm.com/support/docview.wss?uid=swg24037640)
 
@@ -34,7 +32,6 @@ Before you start, please check the official guide in technotes first. [Maximo As
   * v11.1.3fp3_linuxx64_server_t.tar.gz
 
 ## Building IBM Maximo Asset Management V7.6.1 with Liberty image by using build tool
-------------------------------------------------------
 
 Prerequisites: all binaries must be accessible via a web server during building phase.
 
@@ -91,7 +88,6 @@ Procedures:
 7. Make sure to be accessible to Maximo login page: http://hostname/maximo
 
 ## Skip the maxinst process in starting up the maxdb container by using Db2 restore command
-------------------------------------------------------
 
 [Maxinst program](http://www-01.ibm.com/support/docview.wss?uid=swg21314938) supports to initialize and create a Maximo database that called during the "deployConfiguration" process in the Maximo installer. This process is painfully slow because it creates more than thousand tables from scratch. To skip the process, you can use a backup database to restore during first boot time in a maxdb service. So then, it can reduce the creation time for containers from second time.
 
