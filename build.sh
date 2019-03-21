@@ -22,7 +22,7 @@ WAS_VER="${WAS_VER:-19.0.0.2-webProfile8}"
 DB2_VER="${DB2_VER:-11.1.3}"
 PROXY_VER="${PROXY_VER:-1.8}"
 
-DOCKER="${DOCKER_CMD:docker}"
+DOCKER="${DOCKER_CMD:-docker}"
 
 BUILD_NETWORK_NAME="maximo-liberty-build"
 IMAGE_SERVER_NAME="liberty-images"
