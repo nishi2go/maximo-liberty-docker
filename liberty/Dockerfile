@@ -9,7 +9,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM websphere-liberty:18.0.0.4-webProfile8
+ARG libertyver=19.0.0.2-webProfile8
+
+FROM websphere-liberty:${libertyver}
 
 LABEL maintainer="nishi2go@gmail.com"
 

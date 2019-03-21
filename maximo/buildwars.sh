@@ -13,61 +13,67 @@
 # limitations under the License.
 
 function jvm_config {
-  cp $1.orig $1.tmp
+  cp "$1.orig" "$1.tmp"
 
   # Remove default options
   for feat in "Xms" "Xmx"
   do
-    sed -i -e "/$feat/d" $1.tmp
+    sed -i -e "/$feat/d" "$1.tmp"
   done
 
-  echo "-Xdisableexplicitgc" >> $1.tmp
-  echo "-Xcompressedrefs" >> $1.tmp
-  echo "-Dmxe.properties.overridepath=/config/maximo.properties" >> $1.tmp
+  echo "-Xdisableexplicitgc" >> "$1.tmp"
+  echo "-Xcompressedrefs" >> "$1.tmp"
+  echo "-Dmxe.properties.overridepath=/config/maximo.properties" >> "$1.tmp"
 
-  cp $1.tmp $1
-  rm $1.tmp
+  cp "$1.tmp" "$1"
+  rm "$1.tmp"
 }
 
 function edit_server_xml {
-  cp $1.orig $1.tmp
+  cp "$1.orig" "$1.tmp"
 
   # Remove Java EE 7 features
   for feat in "jdbc-4.1" "webProfile-7.0" "javaMail-1.5"
   do
-    sed -i -e "/$feat/d" $1.tmp
+    sed -i -e "/$feat/d" "$1.tmp"
   done
 
   # Remove comment out
-  sed -i 's/[ \t]\+$//' $1.tmp
-  sed -i -e '/^<!--$/d' $1.tmp
-  sed -i -e '/^-->$/d' $1.tmp
+  sed -i 's/[ \t]\+$//' "$1.tmp"
+  sed -i -e '/<!--$/d' "$1.tmp"
+  sed -i -e '/^-->$/d' "$1.tmp"
 
   # Add quicksecuriy
-  xmlstarlet ed -s "/server" -t elem -n "quickStartSecurity" -v "" \
+  xmlstarlet ed \
+    -s "/server" -t elem -n "quickStartSecurity" -v "" \
     -a "/server/quickStartSecurity" -t attr -n "userName" -v '${env.ADMIN_USER_NAME}' \
     -a "/server/quickStartSecurity" -t attr -n "userPassword" -v '${env.ADMIN_PASSWORD}' \
-    -s "/server/featureManager" -t elem -n "feature" -v "appSecurity-2.0" $1.tmp > $1
-  cp $1 $1.tmp
+    -s "/server/featureManager" -t elem -n "feature" -v "appSecurity-2.0" \
+    -s "/server/featureManager" -t elem -n "feature" -v "localConnector-1.0" \
+     "$1.tmp" > "$1.tmp_1"
+  cp "$1.tmp_1" "$1.tmp"
+  rm "$1.tmp_1"
 
   if [ "${JMS_ENABLED}" = "no" ]
   then
-    xmlstarlet ed -L -d "//jmsQueue" \
-      -L -d "//jmsQueueConnectionFactory" \
-      -L -d "//connectionManager" $1.tmp > $1
-    cp $1 $1.tmp
+    xmlstarlet ed -d "//jmsQueue" \
+      -d "//jmsQueueConnectionFactory" \
+      -d "//connectionManager" "$1.tmp" > "$1.tmp_1"
+    cp "$1.tmp_1" "$1.tmp"
+    rm "$1.tmp_1"
   else
     xmlstarlet ed -u "//properties.wasJms/@remoteServerAddress" \
-     -v '${env.JMS_SERVER_HOST}:${env.JMS_SERVER_PORT}:BootstrapBasicMessaging' $1.tmp > $1
-    cp $1 $1.tmp
+     -v '${env.JMS_SERVER_HOST}:${env.JMS_SERVER_PORT}:BootstrapBasicMessaging' "$1.tmp" > "$1.tmp_1"
+    cp "$1.tmp_1" "$1.tmp"
+    rm "$1.tmp_1"
   fi
 
-  xmlstarlet fo $1.tmp > $1
+  xmlstarlet fo "$1.tmp" > "$1"
 
-  rm $1.tmp
+  rm "$1.tmp"
 
   #debug
-  cat $1
+  cat "$1"
 }
 
 JMS_ENABLED=$1
@@ -88,18 +94,18 @@ do
   SERVER_XML="$LIBERTY_DEF_DIR/config-servers/$dir/$dir-server/server.xml"
   if [ ! -f "$SERVER_XML.orig" ]
   then
-    cp $SERVER_XML $SERVER_XML.orig
+    cp "$SERVER_XML" "$SERVER_XML.orig"
   fi
 
-  edit_server_xml $SERVER_XML
+  edit_server_xml "$SERVER_XML"
 
   JVM_OPTIONS="$LIBERTY_DEF_DIR/config-servers/$dir/$dir-server/jvm.options"
   if [ ! -f "$JVM_OPTIONS.orig" ]
   then
-    cp $JVM_OPTIONS $JVM_OPTIONS.orig
+    cp "$JVM_OPTIONS" "$JVM_OPTIONS.orig"
   fi
 
-  jvm_config $JVM_OPTIONS
+  jvm_config "$JVM_OPTIONS"
 done
 
 if [ "${JMS_ENABLED}" = "yes" ]

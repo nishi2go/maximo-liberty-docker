@@ -51,6 +51,7 @@ mxe.db.user=maximo
 mxe.db.password=$DB_MAXIMO_PASSWORD
 mxe.db.schemaowner=maximo
 mxe.useAppServerSecurity=0
+mxe.rmi.enabled=0
 
 # Database Configuration Parameters
 Database.UserSpecifiedJDBCURL=jdbc:db2://$DB_HOST_NAME:$DB_PORT/$MAXDB
@@ -84,7 +85,7 @@ $SMP/ConfigTool/scripts/reconfigurePae.sh -action updateApplicationDBLite \
   -updatedb -enableSkin "$SKIN" -enableEnhancedNavigation
 
 # Deploy WAS.UserName and WAS.Password properties
-cd $SMP/maximo/tools/maximo/internal && ./runscriptfile.sh -cliberty -fliberty
+#cd $SMP/maximo/tools/maximo/internal && ./runscriptfile.sh -cliberty -fliberty
 
 # Fix IP address issue
 MAXIMO_PROPERTIES=$SMP/maximo/applications/maximo/properties/maximo.properties

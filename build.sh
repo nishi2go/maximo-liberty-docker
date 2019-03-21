@@ -18,7 +18,7 @@ JMS_OPT="no"
 PACKAGE_LIST=packages.list
 MAXIMO_VER="${MAXIMO_VER:-7.6.1}"
 IM_VER="${IM_VER:-1.8.8}"
-WAS_VER="${WAS_VER:-18.0.0.4}"
+WAS_VER="${WAS_VER:-19.0.0.2-webProfile8}"
 DB2_VER="${DB2_VER:-11.1.3}"
 PROXY_VER="${PROXY_VER:-1.8}"
 
@@ -203,7 +203,7 @@ build "maximo" "$MAXIMO_VER" "maximo" "IBM Maximo Asset Management" "--build-arg
 build "db2" "$DB2_VER" "maxdb" "IBM Db2 Advanced Workgroup Server Edition"
 
 # Build IBM WebSphere Liberty base image
-build "liberty" "$WAS_VER" "liberty" "IBM WebSphere Application Server Liberty base"
+build "liberty" "$WAS_VER" "liberty" "IBM WebSphere Application Server Liberty base" "--build-arg libertyver=$WAS_VER"
 
 # Build IBM WebSphere Liberty JMS server image
 build "jmsserver" "$WAS_VER" "jmsserver" "IBM WebSphere Application Server Liberty JMS server"
