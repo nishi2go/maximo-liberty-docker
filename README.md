@@ -54,11 +54,11 @@ Procedures:
 1. Place the downloaded Maximo, IBM Db2, IBM Installation Manager and IBM WebSphere Liberty License binaries on a directory
 2. Clone this repository
     ```bash
-    git clone https://github.com/nishi2go/maximo-docker.git
+    git clone https://github.com/nishi2go/maximo-liberty-docker.git
     ```
 3. Move to the directory
     ```bash
-    cd maximo-docker
+    cd maximo-liberty-docker
     ```
 4. Run build tool
    ```bash
@@ -97,7 +97,7 @@ Procedures:
 1. Build container images first (follow above instructions)
 2. Move to the cloned directory.
     ```bash
-    cd maximo-docker
+    cd maximo-liberty-docker
     ```
 3. Make a backup directory.
     ```bash
