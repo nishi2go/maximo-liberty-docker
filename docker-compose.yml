@@ -52,7 +52,7 @@ services:
     environment:
       - LICENSE=accept
       - ADMIN_USER_NAME=admin
-      - ADMIN_USER_NAME=changeit
+      - ADMIN_PASSWORD=changeit
       - JMS_SERVER_HOST=jmsserver
       - JMS_SERVER_PORT=9011
     depends_on:
