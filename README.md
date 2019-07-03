@@ -28,8 +28,11 @@ Before you start, please check the official guide in technotes first. [Maximo As
 
 * Feature Pack/Fix Pack binaries from [Fix Central](http://www-945.ibm.com/support/fixcentral/)
 
-  IBM Db2 Server V11.1 Fix Pack 3
-  * v11.1.3fp3_linuxx64_server_t.tar.gz
+  IBM Maximo Asset Management V7.6.1 Feature pack 1 binaries:
+  * MAMMTFP7611IMRepo.zip
+
+  IBM Db2 Server V11.1 Fix Pack 4 Mod 1
+  * v11.1.4fp4a_linuxx64_server_t.tar.gz
 
 ## Building IBM Maximo Asset Management V7.6.1 with Liberty image by using build tool
 
@@ -122,3 +125,4 @@ So that, now you can create the containers from the backup image that is stored 
 
 ## To do
 1. Kubernetes
+2. Password with Docker secrets

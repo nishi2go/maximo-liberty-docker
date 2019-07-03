@@ -23,11 +23,11 @@ fi
 if [ -d "/home/ctginst1/sqllib" ]
 then
     source ~/sqllib/db2profile
-    ${DB2_PATH}/instance/db2icrt -s ese -u ctgfenc1 -p 50000 ctginst1
+#    ${DB2_PATH}/instance/db2icrt -s ese -u ctgfenc1 -p 50000 ctginst1
     db2start
     db2 update dbm config using SVCENAME 50000 DEFERRED
     db2stop
-    db2set DB2COMM=tcpip
+    db2set -null DB2COMM
     db2start
     db2 create db $MAXDB ALIAS $MAXDB using codeset UTF-8 territory US pagesize 32 K
     db2 update db cfg for $MAXDB using SELF_TUNING_MEM ON

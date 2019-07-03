@@ -48,7 +48,6 @@ function edit_server_xml {
     -s "/server" -t elem -n "quickStartSecurity" -v "" \
     -a "/server/quickStartSecurity" -t attr -n "userName" -v '${env.ADMIN_USER_NAME}' \
     -a "/server/quickStartSecurity" -t attr -n "userPassword" -v '${env.ADMIN_PASSWORD}' \
-    -s "/server/featureManager" -t elem -n "feature" -v "appSecurity-2.0" \
     -s "/server/featureManager" -t elem -n "feature" -v "localConnector-1.0" \
      "$1.tmp" > "$1.tmp_1"
   cp "$1.tmp_1" "$1.tmp"
@@ -76,7 +75,7 @@ function edit_server_xml {
   cat "$1"
 }
 
-JMS_ENABLED=$1
+JMS_ENABLED=$enablejms
 
 SMP="/opt/IBM/SMP"
 

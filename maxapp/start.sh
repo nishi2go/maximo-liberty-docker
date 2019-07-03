@@ -29,14 +29,14 @@ done
 
 cp "$MAXIMO_DIR/maximo.properties" /config/
 
-if [ "$ADMIN_USER_NAME" != "" ]
-then
-  sed -i "1iWAS.AdminUserName=$ADMIN_USER_NAME" /config/maximo.properties
-fi
+#if [ "$ADMIN_USER_NAME" != "" ]
+#then
+#  sed -i "1iWAS.AdminUserName=$ADMIN_USER_NAME" /config/maximo.properties
+#fi
 
-if [ "$ADMIN_PASSWORD" != "" ]
-then
-  sed -i "1iWAS.AdminPassword=$ADMIN_PASSWORD"  /config/maximo.properties
-fi
+#if [ "$ADMIN_PASSWORD" != "" ]
+#then
+#  sed -i "1iWAS.AdminPassword=$ADMIN_PASSWORD"  /config/maximo.properties
+#fi
 
 exec /opt/ibm/wlp/bin/server run defaultServer

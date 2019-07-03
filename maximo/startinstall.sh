@@ -90,3 +90,10 @@ $SMP/ConfigTool/scripts/reconfigurePae.sh -action updateApplicationDBLite \
 # Fix IP address issue
 MAXIMO_PROPERTIES=$SMP/maximo/applications/maximo/properties/maximo.properties
 cp $MAXIMO_PROPERTIES $MAXIMO_DIR && chmod 444 $MAXIMO_DIR/maximo.properties
+
+if [ "${KEEP_RUNNING}" = "yes" ]
+then
+  sleep inf &
+  child=$!
+  wait $child
+fi

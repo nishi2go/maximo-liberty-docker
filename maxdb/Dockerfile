@@ -16,46 +16,43 @@ LABEL maintainer="nishi2go@gmail.com"
 ARG imagesurl=http://liberty-images
 
 ARG ver=11.1
-ARG fp=3fp3
+ARG fp=4fp4a
 ARG backupdir=/backup
 ARG dbalias=MAXDB76
 
 ## Install required software
 RUN dpkg --add-architecture i386
-RUN apt update -y && apt install -y sudo wget unzip bsdtar netcat file \
+RUN apt-get update -y && apt-get install -y sudo wget unzip bsdtar netcat file \
     libx32stdc++6 libpam0g:i386 binutils libaio1 libnuma1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install IBM DB2
 ENV DB2_IMAGE DB2_AWSE_REST_Svr_${ver}_Lnx_86-64.tar.gz
 
-ENV CTGINST1_PASSWORD changeit
-ENV CTGFENC1_PASSWORD changeit
-ENV MAXIMO_PASSWORD changeit
+#ENV DB_MAXIMO_PASSWORD changeit
 
 RUN groupadd ctggrp1
-RUN groupadd ctgfgrp1
 RUN groupadd maximo
 RUN useradd -g ctggrp1 -m -d /home/ctginst1 ctginst1
-RUN useradd -g ctgfgrp1 -m -d /home/ctgfenc1 ctgfenc1
 RUN useradd -g maximo -m -d /home/maximo maximo
-
-RUN echo "ctginst1    ALL=(root) NOPASSWD: /usr/sbin/chpasswd" >> /etc/sudoers.d/ctginst1
-
-RUN mkdir ${backupdir}
-RUN chown ctginst1.ctggrp1 ${backupdir}
-
-RUN mkdir /work
-COPY installdb2.sh /work/
-RUN chmod 755 /work/installdb2.sh
-RUN chown ctginst1.ctggrp1 /work
 
 ENV DB2_PATH /home/ctginst1/sqllib
 ENV MAXDB ${dbalias}
-ENV DB2_PORT 50005
+ENV DB_PORT 50005
 ENV BACKUPDIR ${backupdir}
 
-# Install DB2 V11.1
+RUN echo "ctginst1    ALL=(root) NOPASSWD: /usr/sbin/chpasswd, $DB2_PATH/instance/db2rfe " >> /etc/sudoers.d/ctginst1
+
+RUN mkdir ${backupdir}
+RUN chown ctginst1.ctggrp1 ${backupdir}
+RUN chmod 700 ${backupdir}
+
+RUN mkdir /work
+RUN chown ctginst1.ctggrp1 /work
+COPY --chown=ctginst1:ctggrp1 *.sh /work/
+RUN chmod -R 700 /work/
+
+# Install DB2 V11.1 and Fixpack
 WORKDIR /tmp
 USER ctginst1
 COPY --chown=ctginst1:ctggrp1 db2awse.rsp /tmp
@@ -67,19 +64,13 @@ RUN wget -q ${imagesurl}/$DB2_IMAGE \
   && $DB2_PATH/adm/db2licm -l \
   && rm -rf * \
   && . ~/sqllib/db2profile && db2stop \
-# Install DB2 Fixpack
   && wget -q ${imagesurl}/$DB2_FP_IMAGE \
   && bsdtar -zxpf $DB2_FP_IMAGE \
   && cd server_t \
   && ./installFixPack -n -f update -f nobackup -f db2lib  \
   && cd .. \
   && rm -rf * \
-# Initial set up
   && /work/installdb2.sh
-
-USER root
-COPY *.sh /work/
-RUN chmod +x /work/*.sh
 
 WORKDIR /work
 

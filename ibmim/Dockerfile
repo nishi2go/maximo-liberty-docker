@@ -21,7 +21,7 @@ ENV TEMP /tmp
 WORKDIR /tmp
 
 # Install required packages
-RUN apt update && apt install -y wget unzip && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget unzip && rm -rf /var/lib/apt/lists/*
 
 # Install IBM Installation Manager 1.8.8
 ENV IM_IMAGE IED_V1.8.8_Wins_Linux_86.zip
