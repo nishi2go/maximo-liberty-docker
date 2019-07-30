@@ -126,3 +126,4 @@ So that, now you can create the containers from the backup image that is stored 
 ## To do
 1. Kubernetes
 2. Password with Docker secrets
+3. Industry Solutions
