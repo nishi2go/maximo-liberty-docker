@@ -9,12 +9,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM maximo-liberty/liberty
+ARG buildver=7.6.1.1
+ARG libertyver=19.0.0.6-webProfile8
+FROM maximo-liberty/maximo:${buildver}
+FROM maximo-liberty/liberty:${libertyver}
 
 LABEL maintainer="nishi2go@gmail.com"
 
 ARG maximoapp=maximo-ui
-COPY --chown=1001:0 --from=maximo-liberty/maximo /opt/IBM/SMP/maximo/deployment/was-liberty-default/deployment/$maximoapp/$maximoapp-server/ /config/
+
+COPY --chown=1001:0 --from=0 /opt/IBM/SMP/maximo/deployment/was-liberty-default/deployment/${maximoapp}/${maximoapp}-server/ /config/
 
 RUN installUtility install --acceptLicense defaultServer
 
@@ -31,7 +35,7 @@ ENV ADMIN_USER_NAME=admin
 ENV ADMIN_PASSWORD=changeit
 ENV JMS_SERVER_HOST=jmsserver
 ENV JMS_SERVER_PORT=9011
-ENV JVM_HEAP_MAX_SIZE=4092m
-ENV JVM_HEAP_MIN_SIZE=512m
+#ENV JVM_HEAP_MAX_SIZE=4092m
+#ENV JVM_HEAP_MIN_SIZE=512m
 
 CMD ["/opt/ibm/docker/start.sh"]

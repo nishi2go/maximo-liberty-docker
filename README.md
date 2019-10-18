@@ -42,45 +42,39 @@ You can use a tool for building docker images by using the build tool.
 
 Usage:
 ```
-Usage: build.sh [OPTIONS] [DIR]
+Usage: build.sh [OPTIONS]
 
--c | --check            Check required packages
--C | --deepcheck        Check and compare checksum of required packages
 -r | --remove           Remove images when an image exists in repository
 -J | --disable-jms      Disable JMS configurations in application servers
--d | --check-dir [DIR]  The directory for validating packages (Docker for Windows only)
 -v | --verbose          Output verbosity in docker build
 -h | --help             Show this help text
 ```
 
 Procedures:
-1. Place the downloaded Maximo, IBM Db2, IBM Installation Manager and IBM WebSphere Liberty License binaries on a directory
-2. Clone this repository
+1. Clone this repository
     ```bash
     git clone https://github.com/nishi2go/maximo-liberty-docker.git
     ```
-3. Move to the directory
+2. Place the downloaded Maximo, IBM Db2, IBM Installation Manager and IBM WebSphere Liberty License binaries into the maximo-liberty-docker/images directory.
     ```bash
     cd maximo-liberty-docker
+    ls -l images
+    check.sh                                 Dockerfile                    MAM_7.6.1_LINUX64.tar.gz  packages.list                         wlp-nd-license.jar
+    DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz  IED_V1.8.8_Wins_Linux_86.zip  MAMMTFP7611IMRepo.zip     v11.1.4fp4a_linuxx64_server_t.tar.gz
     ```
-4. Run build tool
+3. Run the build tool
    ```bash
-   bash build.sh [-c] [-C] [-r] [Image directory]
+   bash build.sh [-r] [-v] [-J]
    ```
 
    Example:
    ```bash
-   bash build.sh -c -r /images
-   ```
-
-   Example for Docker for Windows:
-   ```bash
-   bash build.sh -c -r -d /images "C:/images"
+   bash build.sh -r
    ```
    Note 1: This script works on Windows Subsystem on Linux.<br>
    Note 2: md5sum is required. For Mac, install it manually - https://raamdev.com/2008/howto-install-md5sum-sha1sum-on-mac-os-x/
-7. Edit docker-compose.yml to enable optional servers e.g. maximo-api, maximo-report and etc.
-6. Run containers by using the Docker Compose file to create and deploy instances:
+4. Edit docker-compose.yml to enable optional servers e.g. maximo-api, maximo-report and etc.
+5. Run containers by using the Docker Compose file to create and deploy instances:
     ```bash
     docker-compose up -d
     ```
@@ -90,7 +84,7 @@ Procedures:
     ```bash
     docker-compose up -d --scale maximo-ui=2
     ```
-7. Make sure to be accessible to Maximo login page: http://hostname/maximo
+6. Make sure to be accessible to Maximo login page: http://hostname/maximo
 
 ## Skip the maxinst process in starting up the maxdb container by using Db2 restore command
 

@@ -16,13 +16,15 @@ function jvm_config {
   cp "$1.orig" "$1.tmp"
 
   # Remove default options
-  for feat in "Xms" "Xmx"
-  do
-    sed -i -e "/$feat/d" "$1.tmp"
-  done
+#  for feat in "Xms" "Xmx"
+#  do
+#    sed -i -e "/$feat/d" "$1.tmp"
+#  done
 
   echo "-Xdisableexplicitgc" >> "$1.tmp"
   echo "-Xcompressedrefs" >> "$1.tmp"
+  echo "-XX:+UseContainerSupport" >> "$1.tmp"
+  echo "-Xgc:concurrentScavenge" >> "$1.tmp"
   echo "-Dmxe.properties.overridepath=/config/maximo.properties" >> "$1.tmp"
 
   cp "$1.tmp" "$1"

@@ -6,7 +6,6 @@ services:
     environment:
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "DB_PORT=${ENV_DB_PORT}"
-      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
     networks:
       - backend
     ports:
@@ -132,25 +131,25 @@ services:
   #   volumes:
   #     - maximo:/maximo
 
-  maximo-mea:
-    image: maximo-liberty/maximo-mea
-    environment:
-      - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
-      - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
-      - LICENSE=accept
-      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
-    depends_on:
-      - maxdb
-      - maximo
-      - jmsserver
-    networks:
-     frontend:
-       aliases:
-         - maximo-mea
-     backend:
-    volumes:
-      - maximo:/maximo
+  # maximo-mea:
+  #   image: maximo-liberty/maximo-mea
+  #   environment:
+  #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
+  #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+  #     - LICENSE=accept
+  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
+  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #   depends_on:
+  #     - maxdb
+  #     - maximo
+  #     - jmsserver
+  #   networks:
+  #    frontend:
+  #      aliases:
+  #        - maximo-mea
+  #     backend:
+  #   volumes:
+  #     - maximo:/maximo
 
   # maximo-jmsconsumer:
   #   image: maximo-liberty/maximo-jmsconsumer
@@ -172,19 +171,19 @@ services:
   #   volumes:
   #     - maximo:/maximo
 
-  jmsserver:
-    image: maximo-liberty/jmsserver
-    environment:
-      - LICENSE=accept
-      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
-      - "JMS_SERVER_SSL_PORT=${ENV_JMS_SERVER_SSL_PORT}"
-    hostname: "${ENV_JMS_SERVER_HOST}"
-    ports:
-      - "${ENV_JMS_SERVER_PORT}:${ENV_JMS_SERVER_PORT}"
-      - "${ENV_JMS_SERVER_SSL_PORT}:${ENV_JMS_SERVER_SSL_PORT}"
-    networks:
-      - frontend
+  # jmsserver:
+  #   image: maximo-liberty/jmsserver
+  #   environment:
+  #     - LICENSE=accept
+  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
+  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #     - "JMS_SERVER_SSL_PORT=${ENV_JMS_SERVER_SSL_PORT}"
+  #   hostname: "${ENV_JMS_SERVER_HOST}"
+  #   ports:
+  #     - "${ENV_JMS_SERVER_PORT}:${ENV_JMS_SERVER_PORT}"
+  #     - "${ENV_JMS_SERVER_SSL_PORT}:${ENV_JMS_SERVER_SSL_PORT}"
+  #   networks:
+  #     - frontend
 
   frontend-proxy:
     image: maximo-liberty/frontend-proxy

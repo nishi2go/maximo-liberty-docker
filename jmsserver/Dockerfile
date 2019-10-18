@@ -9,14 +9,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM maximo-liberty/liberty
-
+ARG libertyver=19.0.0.6-webProfile8
+FROM maximo-liberty/liberty:${libertyver}
 LABEL maintainer="nishi2go@gmail.com"
 
 ENV JMS_SERVER_PORT 9011
 ENV JMS_SERVER_SSL_PORT 19011
-ENV JVM_HEAP_MAX_SIZE=1024m
-ENV JVM_HEAP_MIN_SIZE=512m
+#ENV JVM_HEAP_MAX_SIZE=1024m
+#ENV JVM_HEAP_MIN_SIZE=512m
 
 USER root
 COPY --chown=1001:0 start.sh /opt/ibm/docker/

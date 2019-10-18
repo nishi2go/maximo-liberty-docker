@@ -15,8 +15,6 @@ FROM websphere-liberty:${libertyver}
 
 LABEL maintainer="nishi2go@gmail.com"
 
-ARG imagesurl=http://liberty-images
-
 # Install required packages
 USER root
 RUN apt-get update \
@@ -27,8 +25,8 @@ RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-
 USER 1001
 
 WORKDIR /tmp
-RUN wget -q ${imagesurl}/wlp-nd-license.jar \
- && java -jar /tmp/wlp-nd-license.jar --acceptLicense /opt/ibm \
+COPY --chown=1001:0 wlp-nd-license.jar /tmp/
+RUN java -jar /tmp/wlp-nd-license.jar --acceptLicense /opt/ibm \
  && rm /tmp/wlp-nd-license.jar
 
 ENV KEYSTORE_REQUIRED false

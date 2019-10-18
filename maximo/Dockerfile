@@ -9,15 +9,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM maximo-liberty/ibmim
+ARG buildver=7.6.1.1
+
+FROM maximo-liberty/images:${buildver}
+FROM ubuntu:16.04
 
 LABEL maintainer="nishi2go@gmail.com"
 
+ARG updateim=no
 ARG fp=1
-ARG imagesurl=http://liberty-images
-ARG installfp=yes
-ARG enablejms=yes
 ARG dbalias=MAXDB76
+ARG enablejms=yes
+ARG installfp=yes
+
+ENV TEMP /tmp
+WORKDIR /tmp
+
+# Install IBM Installation Manager 1.8.8
+RUN mkdir /Install_Mgr 
+COPY --from=0 /Install_Mgr /Install_Mgr/
+RUN /Install_Mgr/EnterpriseDVD/Linux_x86_64/EnterpriseCD-Linux-x86_64/InstallationManager/installc -log /tmp/IM_Install_Unix.xml -acceptLicense \
+ && rm -rf /Install_Mgr
+
+## Update Installation Manager
+RUN if [ "${updateim}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.cic.agent; fi
 
 ENV TEMP /tmp
 WORKDIR /tmp
@@ -32,21 +47,19 @@ WORKDIR /Launchpad
 
 ## Install Maximo V7.6.1
 ENV BYPASS_PRS=True
-ENV MAM_IMAGE MAM_7.6.1_LINUX64.tar.gz
-ENV MAM_FP_IMAGE MAMMTFP761${fp}IMRepo.zip
 # Remove z from tar command because file is not gzipped despite having gz extension
-RUN wget -q ${imagesurl}/$MAM_IMAGE && tar xpf $MAM_IMAGE \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl \
+COPY --from=0 /Launchpad /Launchpad/
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl \
  -input /Launchpad/SilentResponseFiles/Unix/ResponseFile_MAM_Install_Unix.xml \
  -acceptLicense -log /tmp/MAM_Install_Unix.xml \
- && rm $MAM_IMAGE && rm -rf /Launchpad
+ && rm -rf /Launchpad
 
 # Install Maximo V7.6.1 feature pack
 RUN mkdir /work
 WORKDIR /work
 ENV MAM_FP_IMAGE MAMMTFP761${fp}IMRepo.zip
-RUN if [ "${installfp}" = "yes" ]; then wget -q ${imagesurl}/$MAM_FP_IMAGE && sleep 10 \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl install \
+COPY --from=0 /images/${MAM_FP_IMAGE} /work/
+RUN if [ "${installfp}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install \
  com.ibm.tivoli.tpae.base.tpae.main -repositories /work/$MAM_FP_IMAGE \
  -installationDirectory /opt/IBM/SMP -log /tmp/TPAE_FP_Install_Unix.xml -acceptLicense \
  && /opt/IBM/InstallationManager/eclipse/tools/imcl install \
@@ -56,8 +69,8 @@ RUN if [ "${installfp}" = "yes" ]; then wget -q ${imagesurl}/$MAM_FP_IMAGE && sl
 
 RUN dos2unix /opt/IBM/SMP/maximo/deployment/was-liberty-default/*.sh
 
-COPY *.sh /work/
-RUN chmod +x /work/*.sh && /work/buildwars.sh && rm /work/buildwars.sh
+COPY buildwars.sh startinstall.sh /work/
+RUN chmod +x /work/*.sh && /work/buildwars.sh
 
 RUN mkdir /opt/IBM/SMP/maximo/tools/maximo/en/liberty
 COPY liberty.dbc /opt/IBM/SMP/maximo/tools/maximo/en/liberty/
