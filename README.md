@@ -20,8 +20,8 @@ Before you start, please check the official guide in technotes first. [Maximo As
   IBM Maximo Asset Management V7.6.1 binaries:
   * MAM_7.6.1_LINUX64.tar.gz
 
-  IBM WebSphere Liberty base license V9 binaries:
-  * wlp-base-license.jar
+  IBM WebSphere Liberty Network Deployment license V9 binaries:
+  * wlp-nd-license.jar
 
   IBM Db2 Advanced Workgroup Edition V11.1 binaries:
   * DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz
@@ -57,10 +57,17 @@ Procedures:
     ```
 2. Place the downloaded Maximo, IBM Db2, IBM Installation Manager and IBM WebSphere Liberty License binaries into the maximo-liberty-docker/images directory.
     ```bash
-    cd maximo-liberty-docker
-    ls -l images
-    check.sh                                 Dockerfile                    MAM_7.6.1_LINUX64.tar.gz  packages.list                         wlp-nd-license.jar
-    DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz  IED_V1.8.8_Wins_Linux_86.zip  MAMMTFP7611IMRepo.zip     v11.1.4fp4a_linuxx64_server_t.tar.gz
+    > cd maximo-liberty-docker
+    > ls -l images
+    check.sh
+    Dockerfile
+    MAM_7.6.1_LINUX64.tar.gz
+    packages.list
+    wlp-nd-license.jar
+    DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz
+    IED_V1.8.8_Wins_Linux_86.zip
+    MAMMTFP7611IMRepo.zip
+    v11.1.4fp4a_linuxx64_server_t.tar.gz
     ```
 3. Run the build tool
    ```bash
@@ -118,6 +125,6 @@ Procedures:
 So that, now you can create the containers from the backup image that is stored in the directory.
 
 ## To do
-1. Kubernetes
+1. Kubernetes (OpenShift)
 2. Password with Docker secrets
 3. Industry Solutions
