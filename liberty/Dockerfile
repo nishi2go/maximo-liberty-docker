@@ -9,8 +9,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+ARG buildver=7.6.1.1
 ARG libertyver=19.0.0.6-webProfile8
-
+FROM maximo-liberty/images:${buildver}
 FROM websphere-liberty:${libertyver}
 
 LABEL maintainer="nishi2go@gmail.com"
@@ -25,7 +26,7 @@ RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-
 USER 1001
 
 WORKDIR /tmp
-COPY --chown=1001:0 wlp-nd-license.jar /tmp/
+COPY --chown=1001:0 --from=0 /images/wlp-nd-license.jar /tmp/
 RUN java -jar /tmp/wlp-nd-license.jar --acceptLicense /opt/ibm \
  && rm /tmp/wlp-nd-license.jar
 
