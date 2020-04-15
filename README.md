@@ -80,8 +80,7 @@ Procedures:
    ```bash
    bash build.sh -r
    ```
-   Note 1: This script works on Windows Subsystem on Linux.<br>
-   Note 2: md5sum is required. For Mac, install it manually - https://raamdev.com/2008/howto-install-md5sum-sha1sum-on-mac-os-x/
+   Note: This script works on Windows Subsystem on Linux.<br>
 4. Edit docker-compose.yml to enable optional servers e.g. maximo-api, maximo-report and etc.
 5. Run containers by using the Docker Compose file to create and deploy instances:
     ```bash
