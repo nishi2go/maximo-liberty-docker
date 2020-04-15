@@ -3,3 +3,4 @@ images/*.tar.gz
 images/*.jar
 custom/dist*
 *.001
+.DS_Store
