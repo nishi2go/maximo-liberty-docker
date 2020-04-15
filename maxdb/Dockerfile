@@ -12,12 +12,25 @@
 ARG buildver=7.6.1.1
 FROM maximo-liberty/images:${buildver}
 
-FROM ubuntu:16.04
+FROM maximo-liberty/maximo:${buildver}
 
 LABEL maintainer="nishi2go@gmail.com"
 
-ARG backupdir=/backup
-ARG dbalias=MAXDB76
+ARG backup_dir=/backup
+ARG db_alias=MAXDB76
+ARG deploy_db_on_build=yes
+
+ARG mxintadm_password
+ARG maxadmin_password
+ARG db_maximo_password
+ARG maxreg_password
+ARG db_port=50005
+ARG base_lang=en
+ARG add_langs
+ARG admin_email_address=root@localhost
+ARG smtp_server_host_name=localhost
+ARG skin=iot18
+ARG enable_demo_data=no
 
 ## Install required software
 RUN dpkg --add-architecture i386
@@ -32,38 +45,44 @@ RUN useradd -g ctggrp1 -m -d /home/ctginst1 ctginst1
 RUN useradd -g maximo -m -d /home/maximo maximo
 
 ENV DB2_PATH /home/ctginst1/sqllib
-ENV MAXDB ${dbalias}
-ENV DB_PORT 50005
-ENV BACKUPDIR ${backupdir}
+ENV MAXDB ${db_alias}
+ENV DB_PORT ${db_port}
+ENV BACKUPDIR ${backup_dir}
 
 RUN echo "ctginst1    ALL=(root) NOPASSWD: /usr/sbin/chpasswd, $DB2_PATH/instance/db2rfe " >> /etc/sudoers.d/ctginst1
 
-RUN mkdir ${backupdir}
-RUN chown ctginst1.ctggrp1 ${backupdir}
-RUN chmod 700 ${backupdir}
+RUN mkdir ${BACKUPDIR}
+RUN chown ctginst1.ctggrp1 ${BACKUPDIR}
+RUN chmod 700 ${BACKUPDIR}
+COPY --from=0 --chown=ctginst1:ctggrp1 /backup/* ${BACKUPDIR}/
 
-RUN mkdir /work
-RUN chown ctginst1.ctggrp1 /work
-COPY --chown=ctginst1:ctggrp1 *.sh /work/
-RUN chmod -R 700 /work/
+RUN mkdir -p /work/db2
+RUN chown ctginst1.ctggrp1 /work/db2
+COPY --chown=ctginst1:ctggrp1 *.sh /work/db2/
+RUN chmod -R 700 /work/db2
 
 # Install DB2 V11.1 and Fixpack
 WORKDIR /tmp
+RUN rm /tmp/*xml
 USER ctginst1
-RUN mkdir /tmp/db2 && mkdir /tmp/db2fp && chown ctginst1:ctggrp1 /tmp/*
+RUN mkdir /tmp/db2 && mkdir /tmp/db2fp && chown ctginst1:ctggrp1 /tmp/db2*
 COPY --chown=ctginst1:ctggrp1 db2awse.rsp /tmp/
 COPY --from=0 --chown=ctginst1:ctggrp1 /db2 /tmp/db2
 COPY --from=0 --chown=ctginst1:ctggrp1 /db2fp /tmp/db2fp
 RUN ./db2/server_awse_o/db2setup -r db2awse.rsp \
-  && $DB2_PATH/adm/db2licm -a ./db2/server_awse_o/db2/license/db2awse_o.lic \
-  && $DB2_PATH/adm/db2licm -l \
+  && ${DB2_PATH}/adm/db2licm -a ./db2/server_awse_o/db2/license/db2awse_o.lic \
+  && ${DB2_PATH}/adm/db2licm -l \
   && . ~/sqllib/db2profile && db2stop \
   && cd ./db2fp/server_t \
   && ./installFixPack -n -f update -f nobackup -f db2lib \
   && cd ../.. \
-  && rm -rf * \
-  && /work/installdb2.sh
+  && rm -rf db2* \
+  && /work/db2/installdb2.sh
+  
+USER root
+RUN if [ "${deploy_db_on_build}" = "yes" ]; then /work/db2/startinstall.sh; fi
+USER ctginst1
 
 WORKDIR /work
 
-ENTRYPOINT ["/work/startdb2.sh"]
+ENTRYPOINT ["/work/db2/startdb2.sh"]

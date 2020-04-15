@@ -116,11 +116,11 @@ then
   sed -i -e 's/^<!--/& -->/g' $EJB_XMI
 fi
 
-cd $LIBERTY_DEF_DIR
+cd ${LIBERTY_DEF_DIR}
 
 # Compile war files
 for type in "-xwar" "api-war" "cron-war" "jmsconsumer-ear" "mea-ear" "report-war" "ui-war"
 do
-  echo "Run buildmaximo$type.sh ..."
-  bash buildmaximo$type.sh
+  echo "Run buildmaximo${type}.sh ..."
+  bash buildmaximo${type}.sh
 done

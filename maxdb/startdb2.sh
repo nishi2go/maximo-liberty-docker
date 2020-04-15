@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-. $DB2_PATH/db2profile
+. ${DB2_PATH}/db2profile
 
 function sigterm_handler {
-  db2 connect to $MAXDB
+  db2 connect to ${MAXDB}
   db2 terminate
   db2 force applications all
   db2stop force
@@ -26,25 +26,25 @@ function sigterm_handler {
 function change_hostname {
   db2stop
   HOSTNAME=`hostname -A`
-  db2set -g DB2SYSTEM=$HOSTNAME
-  chmod 644 $DB2_PATH/db2nodes.cfg
-  echo "0 $HOSTNAME 0" > $DB2_PATH/db2nodes.cfg
-  chmod 444 $DB2_PATH/db2nodes.cfg
+  db2set -g DB2SYSTEM=${HOSTNAME}
+  chmod 644 ${DB2_PATH}/db2nodes.cfg
+  echo "0 ${HOSTNAME} 0" > ${DB2_PATH}/db2nodes.cfg
+  chmod 444 ${DB2_PATH}/db2nodes.cfg
 }
 
 # Db2 initial setup
 function initial_setup {
   # Restore database when a backup image exists
-  if [ ! -f /work/db2rfe.cfg ]; then
-    echo "INSTANCENAME=ctginst1" > /work/db2rfe.cfg
-    echo "ENABLE_OS_AUTHENTICATION=YES" >> /work/db2rfe.cfg
-    echo "RESERVE_REMOTE_CONNECTION=YES" >> /work/db2rfe.cfg
-    echo "SVCENAME=db2c_ctginst1" >> /work/db2rfe.cfg
-    echo "SVCEPORT=$DB_PORT" >> /work/db2rfe.cfg
-    sudo $DB2_PATH/instance/db2rfe -f /work/db2rfe.cfg
+  if [ ! -f /work/db2/db2rfe.cfg ]; then
+    echo "INSTANCENAME=ctginst1" > /work/db2/db2rfe.cfg
+    echo "ENABLE_OS_AUTHENTICATION=YES" >> /work/db2/db2rfe.cfg
+    echo "RESERVE_REMOTE_CONNECTION=YES" >> /work/db2/db2rfe.cfg
+    echo "SVCENAME=db2c_ctginst1" >> /work/db2/db2rfe.cfg
+    echo "SVCEPORT=${DB_PORT}" >> /work/db2/db2rfe.cfg
+    sudo ${DB2_PATH}/instance/db2rfe -f /work/db2/db2rfe.cfg
 
     echo "Start initial database configurations."
-    if ls $BACKUPDIR/$MAXDB.* > /dev/null 2>&1; then
+    if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
       /bin/bash -c "db2set -null DB2COMM"
       db2start
       until db2gcf -s -t 1 >/dev/null 2>&1; do
@@ -52,16 +52,15 @@ function initial_setup {
       done
 
       echo "Restore database ${MAXDB} from ${BACKUPDIR} ..."
-      /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} with 4 buffers buffer 2048 replace existing parallelism 3 without prompting && db2 terminate"
+      /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} with 4 buffers buffer 2048 replace existing parallelism 3 without prompting && db2 rollforward database ${MAXDB} complete && db2 terminate"
       db2stop
     fi
-
     /bin/bash -c "db2set DB2COMM=tcpip"
   fi
 }
 
 # Change user passwords
-echo "maximo:$DB_MAXIMO_PASSWORD" | sudo chpasswd
+echo "maximo:${DB_MAXIMO_PASSWORD}" | sudo chpasswd
 
 change_hostname
 initial_setup
@@ -73,10 +72,10 @@ db2start
 trap sigterm_handler SIGTERM
 
 # Wait until DB2 port is opened
-until ncat localhost $DB_PORT >/dev/null 2>&1; do
+until ncat localhost ${DB_PORT} >/dev/null 2>&1; do
   sleep 10
 done
 
-while ncat localhost $DB_PORT >/dev/null 2>&1; do
+while ncat localhost ${DB_PORT} >/dev/null 2>&1; do
   sleep 10
 done

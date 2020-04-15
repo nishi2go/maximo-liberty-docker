@@ -14,47 +14,50 @@ services:
       - type: volume
         source: maxdb76
         target: /data
-      - type: bind
-        source: ./backup
-        target: /backup
+#      - type: bind
+#        source: ./backup
+#        target: /backup
     ulimits:
       nproc: 8192
       nofile: 65535
       fsize: -1
     healthcheck:
-      test: ["CMD", "/work/healthcheck.sh"]
+      test: ["CMD", "/work/db2/healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
   
-  maximo:
-    image: maximo-liberty/maximo
-    environment:
-      - MXINTADM_PASSWORD=changeit
-      - MAXADMIN_PASSWORD=changeit
-      - MAXREG_PASSWORD=changeit
-      - "DB_PORT=${ENV_DB_PORT}"
-      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
-      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-      - BASE_LANG=en
-      #- ADD_LANGS=de,fr,ja
-      - ADMIN_EMAIL_ADDRESS=root@localhost
-      - SMTP_SERVER_HOST_NAME=localhost
-      - SKIN=iot18
-      - UPDATE_APPS_ON_REBOOT=yes
-      - KEEP_RUNNING=yes
-      - ENABLE_DEMO_DATA=no
-    depends_on:
-      - maxdb
-    networks:
-      - backend
-    volumes:
-      - maximo:/maximo
+#  maximo:
+#    image: maximo-liberty/maximo
+#    environment:
+#      - MXINTADM_PASSWORD=changeit
+#      - MAXADMIN_PASSWORD=changeit
+#      - MAXREG_PASSWORD=changeit
+#      - "DB_PORT=${ENV_DB_PORT}"
+#      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+#      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+#      - BASE_LANG=en
+#      - ADD_LANGS=de,fr,ja
+#      - ADMIN_EMAIL_ADDRESS=root@localhost
+#      - SMTP_SERVER_HOST_NAME=localhost
+#      - SKIN=iot18
+#      - UPDATE_APPS_ON_REBOOT=yes
+#      - KEEP_RUNNING=yes
+#      - ENABLE_DEMO_DATA=no
+#    depends_on:
+#      - maxdb
+#    networks:
+#      - backend
+#    volumes:
+#      - maximo:/maximo
 
   maximo-ui:
     image: maximo-liberty/maximo-ui
     environment:
+      - "DB_PORT=${ENV_DB_PORT}"
+      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
@@ -63,7 +66,7 @@ services:
       - WLP_LOGGING_CONSOLE_LOGLEVEL=info
     depends_on:
       - maxdb
-      - maximo
+#      - maximo
       - jmsserver
     networks:
       frontend:
@@ -76,6 +79,9 @@ services:
   maximo-cron:
     image: maximo-liberty/maximo-cron
     environment:
+      - "DB_PORT=${ENV_DB_PORT}"
+      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
@@ -83,7 +89,7 @@ services:
       - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
     depends_on:
       - maxdb
-      - maximo
+#      - maximo
       - jmsserver
     networks:
       frontend:
@@ -94,6 +100,9 @@ services:
   # maximo-api:
   #   image: maximo-liberty/maximo-api
   #   environment:
+  #     - "DB_PORT=${ENV_DB_PORT}"
+  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -114,6 +123,9 @@ services:
   # maximo-report:
   #   image: maximo-liberty/maximo-report
   #   environment:
+  #     - "DB_PORT=${ENV_DB_PORT}"
+  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -134,6 +146,9 @@ services:
   # maximo-mea:
   #   image: maximo-liberty/maximo-mea
   #   environment:
+  #     - "DB_PORT=${ENV_DB_PORT}"
+  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -154,6 +169,9 @@ services:
   # maximo-jmsconsumer:
   #   image: maximo-liberty/maximo-jmsconsumer
   #   environment:
+  #     - "DB_PORT=${ENV_DB_PORT}"
+  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -171,19 +189,19 @@ services:
   #   volumes:
   #     - maximo:/maximo
 
-  # jmsserver:
-  #   image: maximo-liberty/jmsserver
-  #   environment:
-  #     - LICENSE=accept
-  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
-  #     - "JMS_SERVER_SSL_PORT=${ENV_JMS_SERVER_SSL_PORT}"
-  #   hostname: "${ENV_JMS_SERVER_HOST}"
-  #   ports:
-  #     - "${ENV_JMS_SERVER_PORT}:${ENV_JMS_SERVER_PORT}"
-  #     - "${ENV_JMS_SERVER_SSL_PORT}:${ENV_JMS_SERVER_SSL_PORT}"
-  #   networks:
-  #     - frontend
+  jmsserver:
+    image: maximo-liberty/jmsserver
+    environment:
+      - LICENSE=accept
+      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
+      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+      - "JMS_SERVER_SSL_PORT=${ENV_JMS_SERVER_SSL_PORT}"
+    hostname: "${ENV_JMS_SERVER_HOST}"
+    ports:
+      - "${ENV_JMS_SERVER_PORT}:${ENV_JMS_SERVER_PORT}"
+      - "${ENV_JMS_SERVER_SSL_PORT}:${ENV_JMS_SERVER_SSL_PORT}"
+    networks:
+      - frontend
 
   frontend-proxy:
     image: maximo-liberty/frontend-proxy
@@ -193,6 +211,24 @@ services:
       - maximo-ui
     networks:
       - frontend
+
+  vsftpd:
+    image: fauria/vsftpd
+    hostname: ftpd
+    ports:
+      - 0.0.0.0:20:20
+      - 0.0.0.0:21:21
+      - 21100-21110:21100-21110
+    networks:
+      - backend
+
+  samba:
+    image: dperson/samba
+    networks:
+      - backend
+    stdin_open: true
+    tty: true
+    command: '-u "admin;changeit" -s "public;/share" -s "users;/srv;no;no;no;admin" -s "admin private share;/admin;no;no;no;admin" -p' 
 
 networks:
   frontend:

@@ -23,13 +23,17 @@ COPY *.zip *.jar *.gz /images/
 
 RUN chmod +x /check.sh && /check.sh -C /images
 
+# Copy backup files
+RUN mkdir /backup
+COPY backup/* /backup/
+
 # Unpack the Db2 packages
 ARG ver=11.1
 ARG fp=4fp4a
 ENV DB2_IMAGE=DB2_AWSE_REST_Svr_${ver}_Lnx_86-64.tar.gz
 ENV DB2_FP_IMAGE=v${ver}.${fp}_linuxx64_server_t.tar.gz
-RUN mkdir /db2 && tar zxvpf /images/${DB2_IMAGE} -C /db2
-RUN mkdir /db2fp && tar zxvpf /images/${DB2_FP_IMAGE} -C /db2fp
+RUN mkdir /db2 && tar zxpf /images/${DB2_IMAGE} -C /db2
+RUN mkdir /db2fp && tar zxpf /images/${DB2_FP_IMAGE} -C /db2fp
 
 # Unpack the IIM packages
 ARG im_image=IED_V1.8.8_Wins_Linux_86.zip
@@ -38,4 +42,4 @@ RUN mkdir /Install_Mgr && unzip -q ${im_image} -d /Install_Mgr
 ARG mam_image=MAM_7.6.1_LINUX64.tar.gz
 ARG mam_fp_image=MAMMTFP761${fp}IMRepo.zip
 
-RUN mkdir /Launchpad && tar xvpf /images/${mam_image} -C /Launchpad
+RUN mkdir /Launchpad && tar xpf /images/${mam_image} -C /Launchpad

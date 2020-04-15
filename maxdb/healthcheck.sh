@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-. $DB2_PATH/db2profile
+. ${DB2_PATH}/db2profile
 DB2INSTANCE=ctginst1
 
 db2gcf -s -t 2 || exit 1

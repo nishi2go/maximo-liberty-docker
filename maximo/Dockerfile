@@ -16,11 +16,12 @@ FROM ubuntu:16.04
 
 LABEL maintainer="nishi2go@gmail.com"
 
-ARG updateim=no
+ARG update_im=no
 ARG fp=1
-ARG dbalias=MAXDB76
-ARG enablejms=yes
-ARG installfp=yes
+ARG db_alias=MAXDB76
+ARG enable_jms=yes
+ARG install_fp=yes
+ARG skip_build=no
 
 ENV TEMP /tmp
 WORKDIR /tmp
@@ -32,13 +33,13 @@ RUN /Install_Mgr/EnterpriseDVD/Linux_x86_64/EnterpriseCD-Linux-x86_64/Installati
  && rm -rf /Install_Mgr
 
 ## Update Installation Manager
-RUN if [ "${updateim}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.cic.agent; fi
+RUN if [ "${update_im}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.cic.agent; fi
 
 ENV TEMP /tmp
 WORKDIR /tmp
 
 # Install required packages
-RUN apt-get update && apt-get install -y netcat wget inetutils-ping \
+RUN apt-get update && apt-get install -y netcat wget gettext inetutils-ping \
  dos2unix apache2 xmlstarlet && rm -rf /var/lib/apt/lists/*
 
 ## Install Maximo middleware and installer
@@ -59,18 +60,19 @@ RUN mkdir /work
 WORKDIR /work
 ENV MAM_FP_IMAGE MAMMTFP761${fp}IMRepo.zip
 COPY --from=0 /images/${MAM_FP_IMAGE} /work/
-RUN if [ "${installfp}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install \
- com.ibm.tivoli.tpae.base.tpae.main -repositories /work/$MAM_FP_IMAGE \
+RUN if [ "${install_fp}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install \
+ com.ibm.tivoli.tpae.base.tpae.main -repositories /work/${MAM_FP_IMAGE} \
  -installationDirectory /opt/IBM/SMP -log /tmp/TPAE_FP_Install_Unix.xml -acceptLicense \
  && /opt/IBM/InstallationManager/eclipse/tools/imcl install \
- com.ibm.tivoli.tpae.base.mam.main -repositories /work/$MAM_FP_IMAGE \
+ com.ibm.tivoli.tpae.base.mam.main -repositories /work/${MAM_FP_IMAGE} \
  -installationDirectory /opt/IBM/SMP -log /tmp/MAM_FP_Install_Unix.xml -acceptLicense \
- && rm /work/$MAM_FP_IMAGE; fi
+ && rm /work/${MAM_FP_IMAGE}; fi
 
 RUN dos2unix /opt/IBM/SMP/maximo/deployment/was-liberty-default/*.sh
 
 COPY buildwars.sh startinstall.sh /work/
-RUN chmod +x /work/*.sh && /work/buildwars.sh
+RUN chmod +x /work/*.sh
+RUN if [ "${skip_build}" = "no" ]; then /work/buildwars.sh; fi
 
 RUN mkdir /opt/IBM/SMP/maximo/tools/maximo/en/liberty
 COPY liberty.dbc /opt/IBM/SMP/maximo/tools/maximo/en/liberty/
@@ -78,7 +80,9 @@ COPY liberty.dbc /opt/IBM/SMP/maximo/tools/maximo/en/liberty/
 RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
     && mv wait-for-it.sh /usr/local/bin && chmod +x /usr/local/bin/wait-for-it.sh
 
+COPY maximo-config.properties.template /opt/
+
 ENV MAXIMO_DIR /maximo
-ENV MAXDB ${dbalias}
+ENV MAXDB ${db_alias}
 
 ENTRYPOINT ["/work/startinstall.sh"]

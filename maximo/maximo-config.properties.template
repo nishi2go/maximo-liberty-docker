@@ -1,0 +1,48 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+
+MW.Operation=Configure
+# Maximo Configuration Parameters
+mxe.adminuserloginid=maxadmin
+mxe.adminPasswd=${MAXADMIN_PASSWORD}
+mxe.system.reguser=maxreg
+mxe.system.regpassword=${MAXREG_PASSWORD}
+mxe.int.dfltuser=mxintadm
+maximo.int.dfltuserpassword=${MXINTADM_PASSWORD}
+MADT.NewBaseLang=${BASE_LANG}
+MADT.NewAddLangs=${ADD_LANGS}
+mxe.adminEmail=${ADMIN_EMAIL_ADDRESS}
+mail.smtp.host=${SMTP_SERVER_HOST_NAME}
+mxe.db.user=maximo
+mxe.db.password=${DB_MAXIMO_PASSWORD}
+mxe.db.schemaowner=maximo
+mxe.useAppServerSecurity=0
+mxe.rmi.enabled=0
+
+# Database Configuration Parameters
+Database.UserSpecifiedJDBCURL=jdbc:db2://${DB_HOST_NAME}:${DB_PORT}/${MAXDB}
+Database.AutomateConfig=false
+Database.Vendor=DB2
+Database.DB2.DatabaseName=${MAXDB}
+Database.DB2.ServerHostName=${DB_HOST_NAME}
+Database.DB2.ServerPort=${DB_PORT}
+Database.DB2.DataTablespaceName=MAXDATA
+Database.DB2.TempTablespaceName=MAXTEMP
+Database.DB2.Vargraphic=true
+Database.DB2.TextSearchEnabled=false
+
+# WebSphere Configuration Parameters
+ApplicationServer.Vendor=WebSphere
+WAS.ND.AutomateConfig=false
+IHS.AutomateConfig=false
+WAS.ClusterAutomatedConfig=false
+WAS.DeploymentManagerRemoteConfig=false

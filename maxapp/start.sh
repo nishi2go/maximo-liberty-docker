@@ -12,31 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ "$JVM_HEAP_MIN_SIZE" != "" ]
+if [ "${JVM_HEAP_MIN_SIZE}" != "" ]
 then
-  echo "-Xms$JVM_HEAP_MIN_SIZE" >> /config/jvm.options
+  echo "-Xms${JVM_HEAP_MIN_SIZE}" >> /config/jvm.options
 fi
 
-if [ "$JVM_HEAP_MAX_SIZE" != "" ]
+if [ "${JVM_HEAP_MAX_SIZE}" != "" ]
 then
-  echo "-Xmx$JVM_HEAP_MAX_SIZE" >> /config/jvm.options
+  echo "-Xmx${JVM_HEAP_MAX_SIZE}" >> /config/jvm.options
 fi
 
-until [ -f "$MAXIMO_DIR/maximo.properties" ]
-do
-  sleep 1
-done
+if [ "${GEN_MAXIMO_PROPERTIES}" != "yes" ]
+then
+  until [ -f "${MAXIMO_DIR}/maximo.properties" ]
+  do
+    sleep 1
+  done
 
-cp "$MAXIMO_DIR/maximo.properties" /config/
+  cp "${MAXIMO_DIR}/maximo.properties" /config/
+else
+  wait-for-it.sh ${DB_HOST_NAME}:${DB_PORT} -t 0 -q -- echo "Database is up"
+  cat /config/maximo.properties.template | envsubst > /config/maximo.properties
+fi
 
-#if [ "$ADMIN_USER_NAME" != "" ]
+#if [ "${ADMIN_USER_NAME}" != "" ]
 #then
-#  sed -i "1iWAS.AdminUserName=$ADMIN_USER_NAME" /config/maximo.properties
+#  sed -i "1iWAS.AdminUserName=${ADMIN_USER_NAME}" /config/maximo.properties
 #fi
 
-#if [ "$ADMIN_PASSWORD" != "" ]
+#if [ "${ADMIN_PASSWORD}" != "" ]
 #then
-#  sed -i "1iWAS.AdminPassword=$ADMIN_PASSWORD"  /config/maximo.properties
+#  sed -i "1iWAS.AdminPassword=${ADMIN_PASSWORD}"  /config/maximo.properties
 #fi
 
 exec /opt/ibm/wlp/bin/server run defaultServer

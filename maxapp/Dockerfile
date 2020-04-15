@@ -24,17 +24,27 @@ RUN installUtility install --acceptLicense defaultServer
 
 ENV MAXIMO_DIR=/maximo
 USER root
+RUN apt-get update -y && apt-get install -y gettext && rm -rf /var/lib/apt/lists/*
 COPY start.sh /opt/ibm/docker/
 RUN chmod 555 /opt/ibm/docker/start.sh
+
+RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+    && mv wait-for-it.sh /usr/local/bin && chmod +x /usr/local/bin/wait-for-it.sh
 
 RUN chown -R 1001.0 /config
 RUN touch /config/maximo.properties && chown 1001.0 /config/maximo.properties && chmod 640 /config/maximo.properties
 USER 1001
+COPY --chown=1001:0 maximo.properties.template /config/
 
 ENV ADMIN_USER_NAME=admin
 ENV ADMIN_PASSWORD=changeit
 ENV JMS_SERVER_HOST=jmsserver
 ENV JMS_SERVER_PORT=9011
+ENV GEN_MAXIMO_PROPERTIES=yes
+ENV DB_MAXIMO_PASSWORD=changeit
+ENV DB_HOST_NAME=maxdb
+ENV DB_PORT=50005
+ENV MAXDB=maxdb76
 #ENV JVM_HEAP_MAX_SIZE=4092m
 #ENV JVM_HEAP_MIN_SIZE=512m
 

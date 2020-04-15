@@ -1,0 +1,16 @@
+backup_dir=/backup
+db_alias=MAXDB76
+deploy_db_on_build=yes
+update_im=no
+mxintadm_password=changeit
+maxadmin_password=changeit
+maxreg_password=changeit
+db_port=50005
+db_maximo_password=changeit
+base_lang=en
+add_langs=de,fr
+admin_email_address=root@localhost
+smtp_server_host_name=localhost
+skin=iot18
+enable_demo_data=no
+enable_jms=yes
