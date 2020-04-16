@@ -118,7 +118,7 @@ if [[ ${REMOVE} -eq 1 ]]; then
   remove "maximo-base" "${MAXIMO_VER}" "IBM Maximo Asset Management base"
   remove "liberty" "${WAS_VER}" "IBM WebSphere Application Server Liberty base"
   remove "ibmim" "${IM_VER}" "IBM Installation Manager"
-  remove "image" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+  remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
   remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
 
   if [[ ${REMOVE_ONLY} -eq 1 ]]; then
