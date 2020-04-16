@@ -212,24 +212,6 @@ services:
     networks:
       - frontend
 
-  vsftpd:
-    image: fauria/vsftpd
-    hostname: ftpd
-    ports:
-      - 0.0.0.0:20:20
-      - 0.0.0.0:21:21
-      - 21100-21110:21100-21110
-    networks:
-      - backend
-
-  samba:
-    image: dperson/samba
-    networks:
-      - backend
-    stdin_open: true
-    tty: true
-    command: '-u "admin;changeit" -s "public;/share" -s "users;/srv;no;no;no;admin" -s "admin private share;/admin;no;no;no;admin" -p' 
-
 networks:
   frontend:
   backend:
