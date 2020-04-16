@@ -98,7 +98,7 @@ Procedures:
 
 In order to install industry solutions e.g. Oil & Gas, Service Providers and etc, you can use a custom Maximo image in the ``` custom ``` directory. You can add the scripts to ``` custom/Dockerfile ```. There are Maximo for Oil & Gas sample scripts in the dockerfile. Please uncomment the section in the file to install the Maximo for Oil & Gas V7.6.1 onto Maximo Asset Management V7.6.1.1.
 
-#### Sample steps to install Oil and Gas Industory Solution.
+#### Sample steps to install Oil and Gas Industry Solution.
 
 1. Uncomment the installation section in ``` custom/Dockerfile ```.
     ```dockerfile
@@ -149,7 +149,7 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 2. Change ```deploy_db_on_build``` to no in ```build.args```.
 3. Run the build command.
 
-## Skip the database deployemnt in build the maxdb container by using Db2 bakup image.
+## Skip the database deployment in build the maxdb container by using Db2 bakup image.
 
 [Maxinst program](http://www-01.ibm.com/support/docview.wss?uid=swg21314938) supports to initialize and create a Maximo database that called during the "deployConfiguration" process in the Maximo installer. This process is painfully slow because it creates more than a thousand tables from scratch. To skip the process, you can use a backup database image to restore during the build time in a maxdb container image. 
 
