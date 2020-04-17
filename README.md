@@ -190,14 +190,16 @@ When you want to restore your database backup image on runtime, run the followin
             source: ./backup
             target: /backup
     ```
-5. Run containers by using the Docker Compose file. (follow above instructions)
-6. Take a backup from the maxdb service by using a backup tool.
-    ```bash
-    docker-compose exec maxdb /work/db2/backup.sh maxdb76 /backup
-    ```
-    Note: Backup image must be only one in the directory. The backup task must fail when more than two images in it.
+5. Run containers by using the Docker Compose file. (follow the above instructions)
 
-So that, now you can create the containers from the backup image that is stored in the directory.
+#### Take a backup database from a running container.
+
+You can take a backup from the maxdb container by using a backup tool.
+```bash
+docker-compose exec maxdb /work/db2/backup.sh maxdb76 /backup
+```
+
+Note: There must be one file in the directory. The restore task will fail when more than two images in it.
 
 ## To do
 1. Kubernetes (OpenShift)
