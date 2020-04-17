@@ -148,6 +148,7 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 1. Uncomment the maximo section in ```docker-compose.yml```.
 2. Change ```deploy_db_on_build``` to no in ```build.args```.
 3. Run the build command.
+4. Change the values of ``` GEN_MAXIMO_PROPERTIES ``` to ``` no ``` in ``` docker-compose.yml ``` 
 
 ## Skip the database deployment in build the maxdb container by using Db2 bakup image.
 

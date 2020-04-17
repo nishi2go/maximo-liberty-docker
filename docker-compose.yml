@@ -57,6 +57,7 @@ services:
     environment:
       - "DB_PORT=${ENV_DB_PORT}"
       - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+      - GEN_MAXIMO_PROPERTIES=yes
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
@@ -82,6 +83,7 @@ services:
       - "DB_PORT=${ENV_DB_PORT}"
       - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+      - GEN_MAXIMO_PROPERTIES=yes
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
@@ -103,6 +105,7 @@ services:
   #     - "DB_PORT=${ENV_DB_PORT}"
   #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+  #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -126,6 +129,7 @@ services:
   #     - "DB_PORT=${ENV_DB_PORT}"
   #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+  #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -149,6 +153,7 @@ services:
   #     - "DB_PORT=${ENV_DB_PORT}"
   #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+  #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -172,6 +177,7 @@ services:
   #     - "DB_PORT=${ENV_DB_PORT}"
   #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+  #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
