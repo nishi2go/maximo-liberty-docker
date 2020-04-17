@@ -80,7 +80,7 @@ Procedures:
    ```bash
    bash build.sh -r
    ```
-   Note: This script works on Windows Subsystem on Linux.<br>
+   Note: This script works on Windows Subsystem on Linux.
 4. Edit docker-compose.yml to enable optional servers e.g. maximo-api, maximo-report and etc.
 5. Run containers by using the Docker Compose file to create and deploy instances:
     ```bash
@@ -96,9 +96,9 @@ Procedures:
 
 ## How to use a custom build image.
 
-In order to install industry solutions e.g. Oil & Gas, Service Providers and etc, you can use a custom Maximo image in the ``` custom ``` directory. You can add the scripts to ``` custom/Dockerfile ```. There are Maximo for Oil & Gas sample scripts in the dockerfile. Please uncomment the section in the file to install the Maximo for Oil & Gas V7.6.1 onto Maximo Asset Management V7.6.1.1.
+To install industry solutions e.g. Oil & Gas, Service Providers and the other offerings, you can use a custom Maximo dockerfile which aims to extend the original Maximo installation container. A sample script ``` custom/Dockerfile ``` allows to run IBM Installation Manager, unzip Interim Fixes and/or etc at a build time. You can find a Maximo for Oil & Gas sample in the dockerfile. Please uncomment the section in the file to install the Maximo for Oil & Gas V7.6.1 onto Maximo Asset Management V7.6.1.1.
 
-#### Sample steps to install Oil and Gas Industry Solution.
+#### Sample steps to install Maximo for Oil and Gas Industry Solution.
 
 1. Uncomment the installation section in ``` custom/Dockerfile ```.
     ```dockerfile
@@ -143,16 +143,16 @@ enable_jms=yes
 
 The database deployment a.k.a maxinst and updatedb will be executed on the docker build time by default. It reduces to the initial start-up time, but longer the build time. When you want to switch the behavior to deploy the database schema on runtime, run the following procedures before building the images.
 
-##### Procedures to switch deploy db on runtime.
+#### Procedures to switch deploy database schemas on runtime.
 
 1. Uncomment the maximo section in ```docker-compose.yml```.
 2. Change ```deploy_db_on_build``` to no in ```build.args```.
 3. Run the build command.
 4. Change the values of ``` GEN_MAXIMO_PROPERTIES ``` to ``` no ``` in ``` docker-compose.yml ``` 
 
-## Skip the database deployment in build the maxdb container by using Db2 bakup image.
+## Skip the database deployment during the maxdb container building time by using a Db2 backup image.
 
-[Maxinst program](http://www-01.ibm.com/support/docview.wss?uid=swg21314938) supports to initialize and create a Maximo database that called during the "deployConfiguration" process in the Maximo installer. This process is painfully slow because it creates more than a thousand tables from scratch. To skip the process, you can use a backup database image to restore during the build time in a maxdb container image. 
+[Maxinst program](http://www-01.ibm.com/support/docview.wss?uid=swg21314938) supports to initialize and create a Maximo database that is called during the "deployConfiguration" process in the Maximo installer. This process is painfully slow because it creates more than a thousand tables from scratch. To skip the process, you can use a backup database image to restore during the build time in a maxdb container image. 
 
 #### Procedures:
 
@@ -167,7 +167,7 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 3. Place your backup image to the above directory.
 4. Build container images by using the build tool.
 
-## Restore the database in starting up the maxdb container by using Db2 backup image.
+## Restore the database during starting up the maxdb container by using a Db2 backup image.
 
 When you want to restore your database backup image on runtime, run the following procedures.
 
