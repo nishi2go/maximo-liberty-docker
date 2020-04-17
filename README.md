@@ -48,7 +48,7 @@ Build Maximo Docker containers.
 -R | --remove-only      Remove images without building when an image exists in repository
 -c | --use-custom-image Build a custom image for Maximo installation container
 -v | --verbose          Output verbosity in docker build
--s | --skip-db          Skip to build and remove a DB image
+-s | --skip-db          Skip to build and remove a maxdb image
 -h | --help             Show this help textt
 ```
 
@@ -73,7 +73,7 @@ Procedures:
     ```
 3. Run the build tool
    ```bash
-   bash build.sh [-r] [-v] [-J]
+   bash build.sh [-r] [-v] [-c]
    ```
 
    Example:
