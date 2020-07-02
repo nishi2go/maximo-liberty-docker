@@ -1,0 +1,64 @@
+# Copyright 2020 Yasutaka Nishimura (nishi2go). All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: maximo
+    tier: application
+    service: installation
+  name: maximo-inst
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        app: maximo
+        tier: application
+        service: installation
+    spec:
+      containers:
+      - env:
+        - name: MXINTADM_PASSWORD
+          value: "changeit"
+        - name: MAXADMIN_PASSWORD
+          value: "changeit"
+        - name: MAXREG_PASSWORD
+          value: "changeit"
+        - name: DB_MAXIMO_PASSWORD
+          valueFrom:
+              secretKeyRef:
+                name: maximo-maxdb-credential
+                key: password
+        - name: BASE_LANG
+          value: "en"
+        - name: ADD_LANGS
+          value: "de,fr,ja"
+        - name: ADMIN_EMAIL_ADDRESS
+          value: root@localhost
+        - name: SMTP_SERVER_HOST_NAME
+          value: localhost
+        - name: SKIN
+          value: iot18
+        - name: UPDATE_APPS_ON_REBOOT
+          value: "no"
+        - name: KEEP_RUNNING
+          value: "no"
+        - name: ENABLE_DEMO_DATA
+          value: "no"
+        image: localhost:32000/maximo-liberty/maximo:7.6.1.1
+        imagePullPolicy: IfNotPresent
+        name: maximo-inst
+      restartPolicy: Never
+      serviceAccountName: default

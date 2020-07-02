@@ -25,6 +25,7 @@ function jvm_config {
   echo "-Xcompressedrefs" >> "$1.tmp"
   echo "-XX:+UseContainerSupport" >> "$1.tmp"
   echo "-Xgc:concurrentScavenge" >> "$1.tmp"
+  echo "-XX:+ExitOnOutOfMemoryError" >> "$1.tmp"
   echo "-Dmxe.properties.overridepath=/config/maximo.properties" >> "$1.tmp"
 
   cp "$1.tmp" "$1"
@@ -51,6 +52,7 @@ function edit_server_xml {
     -a "/server/quickStartSecurity" -t attr -n "userName" -v '${env.ADMIN_USER_NAME}' \
     -a "/server/quickStartSecurity" -t attr -n "userPassword" -v '${env.ADMIN_PASSWORD}' \
     -s "/server/featureManager" -t elem -n "feature" -v "localConnector-1.0" \
+    -s "/server/featureManager" -t elem -n "feature" -v "ejbHome-3.2" \
      "$1.tmp" > "$1.tmp_1"
   cp "$1.tmp_1" "$1.tmp"
   rm "$1.tmp_1"
@@ -64,7 +66,7 @@ function edit_server_xml {
     rm "$1.tmp_1"
   else
     xmlstarlet ed -u "//properties.wasJms/@remoteServerAddress" \
-     -v '${env.JMS_SERVER_HOST}:${env.JMS_SERVER_PORT}:BootstrapBasicMessaging' "$1.tmp" > "$1.tmp_1"
+     -v '${env.MAXIMO_JMS_SERVICE_HOST}:${env.MAXIMO_JMS_SERVICE_PORT}:BootstrapBasicMessaging' "$1.tmp" > "$1.tmp_1"
     cp "$1.tmp_1" "$1.tmp"
     rm "$1.tmp_1"
   fi

@@ -15,13 +15,15 @@
 # Clear old deployment files first
 SMP="/opt/IBM/SMP"
 
+mkdir -p ${MAXIMO_DIR}
+
 if [ -f "${MAXIMO_DIR}/maximo.properties" ]
 then
   rm "${MAXIMO_DIR}/maximo.properties"
 fi
 
 # Watch and wait the database
-wait-for-it.sh ${DB_HOST_NAME}:${DB_PORT} -t 0 -q -- echo "Database is up"
+wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is up"
 
 if [[ ! -z "${ENABLE_DEMO_DATA}" && "${ENABLE_DEMO_DATA}" = "yes" ]]
 then

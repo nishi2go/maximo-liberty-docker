@@ -24,7 +24,7 @@ fi
 export MXINTADM_PASSWORD=${mxintadm_password}
 export MAXADMIN_PASSWORD=${maxadmin_password}
 export MAXREG_PASSWORD=${maxreg_password}
-export DB_HOST_NAME=localhost
+export MAXDB_SERVICE_HOST=localhost
 export DB_MAXIMO_PASSWORD=${db_maximo_password}
 export BASE_LANG=${base_lang}
 export ADD_LANGS=${add_langs}
@@ -75,6 +75,15 @@ sed -ie "s/^ApplicationServer.Vendor=.*/ApplicationServer.Vendor=WebSphereLibert
 ${SMP}/ConfigTool/scripts/reconfigurePae.sh -action updateApplicationDBLite \
   -updatedb -enableSkin "${skin}" -enableEnhancedNavigation || exit 1
 
+# Take a backup for the later process
 su - ctginst1 <<- EOS
+ db2 CONNECT TO ${MAXDB}
+ db2 QUIESCE DATABASE IMMEDIATE FORCE CONNECTIONS
+ db2 CONNECT RESET
+ db2 BACKUP DATABASE ${MAXDB} TO /work/backup WITH 4 BUFFERS BUFFER 2048 PARALLELISM 2 COMPRESS WITHOUT PROMPTING
+ db2 CONNECT TO ${MAXDB}
+ db2 UNQUIESCE DATABASE
+ db2 CONNECT RESET
+
  db2set -null DB2COMM
 EOS

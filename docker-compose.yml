@@ -1,19 +1,19 @@
 version: '3.6'
 services:
   maxdb:
-    image: maximo-liberty/db2
-    hostname: "${ENV_DB_HOST_NAME}"
+    image: maximo-liberty/db2:7.6.1.1
+    hostname: "${ENV_MAXDB_SERVICE_HOST}"
     environment:
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-      - "DB_PORT=${ENV_DB_PORT}"
+      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
     networks:
       - backend
     ports:
-      - "${ENV_DB_PORT}:${ENV_DB_PORT}"
+      - "${ENV_MAXDB_SERVICE_PORT}:${ENV_MAXDB_SERVICE_PORT}"
     volumes:
       - type: volume
         source: maxdb76
-        target: /data
+        target: /home/ctginst1/ctginst1
 #      - type: bind
 #        source: ./backup
 #        target: /backup
@@ -29,13 +29,13 @@ services:
       start_period: 40s
   
 #  maximo:
-#    image: maximo-liberty/maximo
+#    image: maximo-liberty/maximo:7.6.1.1
 #    environment:
 #      - MXINTADM_PASSWORD=changeit
 #      - MAXADMIN_PASSWORD=changeit
 #      - MAXREG_PASSWORD=changeit
-#      - "DB_PORT=${ENV_DB_PORT}"
-#      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+#      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+#      - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
 #      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
 #      - BASE_LANG=en
 #      - ADD_LANGS=de,fr,ja
@@ -53,17 +53,17 @@ services:
 #      - maximo:/maximo
 
   maximo-ui:
-    image: maximo-liberty/maximo-ui
+    image: maximo-liberty/maximo-ui:7.6.1.1
     environment:
-      - "DB_PORT=${ENV_DB_PORT}"
-      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+      - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
       - GEN_MAXIMO_PROPERTIES=yes
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
-      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+      - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+      - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - WLP_LOGGING_CONSOLE_LOGLEVEL=info
     depends_on:
       - maxdb
@@ -78,17 +78,17 @@ services:
       - maximo:/maximo
 
   maximo-cron:
-    image: maximo-liberty/maximo-cron
+    image: maximo-liberty/maximo-cron:7.6.1.1
     environment:
-      - "DB_PORT=${ENV_DB_PORT}"
-      - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+      - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - GEN_MAXIMO_PROPERTIES=yes
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
-      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+      - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+      - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
     depends_on:
       - maxdb
 #      - maximo
@@ -100,17 +100,17 @@ services:
       - maximo:/maximo
 
   # maximo-api:
-  #   image: maximo-liberty/maximo-api
+  #   image: maximo-liberty/maximo-api:7.6.1.1
   #   environment:
-  #     - "DB_PORT=${ENV_DB_PORT}"
-  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
-  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+  #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #   depends_on:
   #     - maxdb
   #     - maximo
@@ -124,17 +124,17 @@ services:
   #     - maximo:/maximo
 
   # maximo-report:
-  #   image: maximo-liberty/maximo-report
+  #   image: maximo-liberty/maximo-report:7.6.1.1
   #   environment:
-  #     - "DB_PORT=${ENV_DB_PORT}"
-  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
-  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+  #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #   depends_on:
   #     - maxdb
   #     - maximo
@@ -148,17 +148,17 @@ services:
   #     - maximo:/maximo
 
   # maximo-mea:
-  #   image: maximo-liberty/maximo-mea
+  #   image: maximo-liberty/maximo-mea:7.6.1.1
   #   environment:
-  #     - "DB_PORT=${ENV_DB_PORT}"
-  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
-  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+  #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #   depends_on:
   #     - maxdb
   #     - maximo
@@ -172,17 +172,17 @@ services:
   #     - maximo:/maximo
 
   # maximo-jmsconsumer:
-  #   image: maximo-liberty/maximo-jmsconsumer
+  #   image: maximo-liberty/maximo-jmsconsumer:7.6.1.1
   #   environment:
-  #     - "DB_PORT=${ENV_DB_PORT}"
-  #     - "DB_HOST_NAME=${ENV_DB_HOST_NAME}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
   #     - GEN_MAXIMO_PROPERTIES=yes
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
-  #     - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-  #     - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
+  #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+  #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #   depends_on:
   #     - maxdb
   #     - maximo
@@ -196,21 +196,21 @@ services:
   #     - maximo:/maximo
 
   jmsserver:
-    image: maximo-liberty/jmsserver
+    image: maximo-liberty/jmsserver:19.0.0.6-webProfile8
     environment:
       - LICENSE=accept
-      - "JMS_SERVER_HOST=${ENV_JMS_SERVER_HOST}"
-      - "JMS_SERVER_PORT=${ENV_JMS_SERVER_PORT}"
-      - "JMS_SERVER_SSL_PORT=${ENV_JMS_SERVER_SSL_PORT}"
-    hostname: "${ENV_JMS_SERVER_HOST}"
+      - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
+      - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+      - "MAXIMO_JMS_SERVICE_SSL_PORT=${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
+    hostname: "${ENV_MAXIMO_JMS_SERVICE_HOST}"
     ports:
-      - "${ENV_JMS_SERVER_PORT}:${ENV_JMS_SERVER_PORT}"
-      - "${ENV_JMS_SERVER_SSL_PORT}:${ENV_JMS_SERVER_SSL_PORT}"
+      - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
+      - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     networks:
       - frontend
 
   frontend-proxy:
-    image: maximo-liberty/frontend-proxy
+    image: maximo-liberty/frontend-proxy:1.8
     ports:
       - 80:80
     depends_on:

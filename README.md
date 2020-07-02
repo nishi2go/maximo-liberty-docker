@@ -2,7 +2,7 @@
 
 Maximo with Liberty on Docker enables to run Maximo Asset Management with WebSphere Liberty on Docker. The images are deployed fine-grained services instead of a single instance. The following instructions describe how to set up IBM Maximo Asset Management V7.6 Docker images. These images consist of several components e.g. WebSphere Liberty, Db2, and Maximo installation program.
 
-Before you start, please check the official guide in technotes first. [Maximo Asset Management 7.6.1 WebSphere Liberty Support](https://www-01.ibm.com/support/docview.wss?uid=swg22017219)
+Before you start, learn more about Maximo WebSphere Liberty support from the official documentation. [Maximo Asset Management 7.6.1 WebSphere Liberty Support](https://www.ibm.com/support/pages/node/572105)
 
 ![Componets of Docker Images](https://raw.githubusercontent.com/nishi2go/maximo-liberty-docker/master/maximo-liberty-docker.svg?sanitize=true)
 
@@ -44,12 +44,15 @@ Usage: build.sh [OPTIONS]
 
 Build Maximo Docker containers.
 
--r | --remove           Remove images when an image exists in repository
--R | --remove-only      Remove images without building when an image exists in repository
--c | --use-custom-image Build a custom image for Maximo installation container
--v | --verbose          Output verbosity in docker build
--s | --skip-db          Skip to build and remove a maxdb image
--h | --help             Show this help textt
+-r  | --remove                 Remove images when an image exists in repository.
+-R  | --remove-only            Remove images without building when an image exists in repository.
+-rt | --remove-latest-tag      Do not add the letest tag to the built images.
+-c  | --use-custom-image       Build a custom image for Maximo installation container.
+-v  | --verbose                Output verbosity in docker build.
+-p  | --prune                  Remove intermediate multi-stage builds automatically.
+-s  | --skip-db                Skip building and removing a DB image.
+--push-registry=REGISTRY_URL  Push the built images to a specified remote Docker registry.
+-h  | --help                   Show this help text.
 ```
 
 Procedures:
@@ -93,6 +96,10 @@ Procedures:
     docker-compose up -d --scale maximo-ui=2
     ```
 6. Make sure to be accessible to Maximo login page: http://hostname/maximo
+
+## How to deploy Maximo on Kuberenetes
+
+See the [Maximo on Kubernetes](https://github.com/nishi2go/maximo-liberty-docker/blob/master/kubernetes/README.md) document.
 
 ## How to use a custom build image.
 
@@ -202,5 +209,5 @@ docker-compose exec maxdb /work/db2/backup.sh maxdb76 /backup
 Note: There must be one file in the directory. The restore task will fail when more than two images in it.
 
 ## To do
-1. Kubernetes (OpenShift)
-2. Password with Docker secrets
+1. Helm support
+2. Industry Solution templates

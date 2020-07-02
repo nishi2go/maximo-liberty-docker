@@ -1,0 +1,122 @@
+# Copyright 2020 Yasutaka Nishimura (nishi2go). All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: maximo
+    tier: storage
+    service: database
+  name: maximo-database-storage
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: maximo
+    tier: service
+    service: database
+  name: maxdb
+spec:
+  ports:
+  - name: jdbc
+    port: 50005
+    targetPort: 50005
+  selector:
+    app: maximo
+    tier: backend
+    service: database
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: maximo
+    tier: backend
+    service: database
+  name: maximo-maxdb
+spec:
+  replicas: 1
+  progressDeadlineSeconds: 3000
+  selector:
+    matchLabels:
+      app: maximo
+      tier: backend
+      service: database
+  template:
+    metadata:
+      labels:
+        app: maximo
+        tier: backend
+        service: database
+    spec:
+      containers:
+      - env:
+        - name: DB_MAXIMO_PASSWORD
+          valueFrom:
+             secretKeyRef:
+                name: maximo-maxdb-credential
+                key: password
+        image: localhost:32000/maximo-liberty/db2:7.6.1.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /work/db2/healthcheck.sh
+          failureThreshold: 3
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+        startupProbe:
+          exec:
+            command:
+            - /work/db2/healthcheck.sh
+          failureThreshold: 50
+          periodSeconds: 10
+        name: maxdb
+        ports:
+        - containerPort: 50005
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "100m"
+          limits:
+            memory: "8Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - mountPath: /home/ctginst1/ctginst1
+          name: maxdb
+        securityContext:
+          privileged: true
+      initContainers:
+      - image: localhost:32000/maximo-liberty/db2:7.6.1.1
+        imagePullPolicy: IfNotPresent
+        name: init-maxdb
+        volumeMounts:
+        - mountPath: /home/ctginst1/ctginst1
+          name: maxdb
+        command: ['bash', '-c', 'echo "Check the database directory."; if ls ${DATADIR}/* > /dev/null 2>&1; then echo "Data files exist. Skip copying the initial data."; else echo "The data directory is empty. Copy the initial data from this container."; cp -rp ${INITDATADIR}/* ${DATADIR}/; echo "Done."; fi']
+      restartPolicy: Always
+      serviceAccountName: default
+      volumes:
+      - name: maxdb
+        persistentVolumeClaim:
+          claimName: maximo-database-storage

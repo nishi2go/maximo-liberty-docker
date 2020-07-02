@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+terminate_handler()
+{
+  echo "Terminating the Maximo server..."
+  /opt/ibm/wlp/bin/server stop defaultServer
+}
+
+trap die SIGTERM
+
 if [ "${JVM_HEAP_MIN_SIZE}" != "" ]
 then
   echo "-Xms${JVM_HEAP_MIN_SIZE}" >> /config/jvm.options
@@ -31,18 +39,13 @@ then
 
   cp "${MAXIMO_DIR}/maximo.properties" /config/
 else
-  wait-for-it.sh ${DB_HOST_NAME}:${DB_PORT} -t 0 -q -- echo "Database is up"
+  wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is up"
   cat /config/maximo.properties.template | envsubst > /config/maximo.properties
 fi
 
-#if [ "${ADMIN_USER_NAME}" != "" ]
-#then
-#  sed -i "1iWAS.AdminUserName=${ADMIN_USER_NAME}" /config/maximo.properties
-#fi
+if [ -z "${LIBERTY_CMD}" ]
+then
+  LIBERTY_CMD=run
+fi
 
-#if [ "${ADMIN_PASSWORD}" != "" ]
-#then
-#  sed -i "1iWAS.AdminPassword=${ADMIN_PASSWORD}"  /config/maximo.properties
-#fi
-
-exec /opt/ibm/wlp/bin/server run defaultServer
+exec /opt/ibm/wlp/bin/server ${LIBERTY_CMD} defaultServer

@@ -28,10 +28,10 @@
     <queue id="jms/maximo/int/queues/weather"/>
   </messagingEngine>
 
-  <wasJmsEndpoint host="*" wasJmsPort="${env.JMS_SERVER_PORT}" wasJmsSSLPort="${env.JMS_SERVER_SSL_PORT}" />
+  <wasJmsEndpoint host="*" wasJmsPort="${env.MAXIMO_JMS_SERVICE_PORT}" wasJmsSSLPort="${env.MAXIMO_JMS_SERVICE_PORT}" />
 
   <jmsQueueConnectionFactory jndiName="jms/maximo/int/cf/intcf">
-    <properties.wasJms remoteServerAddress="localhost:${env.JMS_SERVER_PORT}:BootstrapBasicMessaging" />
+    <properties.wasJms remoteServerAddress="localhost:${env.MAXIMO_JMS_SERVICE_PORT}:BootstrapBasicMessaging" />
   </jmsQueueConnectionFactory>
 
   <jmsQueue id="sqin" jndiName="jms/maximo/int/queues/sqin">

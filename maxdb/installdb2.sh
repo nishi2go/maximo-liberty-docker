@@ -22,11 +22,11 @@ if [ -d "${DB2_PATH}" ]
 then
     source ~/sqllib/db2profile
     db2start
-    db2 update dbm config using SVCENAME ${DB_PORT} DEFERRED
+    db2 update dbm config using SVCENAME ${MAXDB_SERVICE_PORT} DEFERRED
     db2stop
     db2set -null DB2COMM
     db2start
-    db2 create db ${MAXDB} ALIAS ${MAXDB} using codeset UTF-8 territory US pagesize 32 K
+    db2 create db ${MAXDB} using codeset UTF-8 territory US pagesize 32 K
     db2 update db cfg for ${MAXDB} using SELF_TUNING_MEM ON
     db2 update db cfg for ${MAXDB} using APPGROUP_MEM_SZ 16384 DEFERRED
     db2 update db cfg for ${MAXDB} using APPLHEAPSZ 2048 AUTOMATIC DEFERRED
@@ -109,7 +109,7 @@ if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
   done
 
   echo "Restore database ${MAXDB} from ${BACKUPDIR} ..."
-  /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} with 4 buffers buffer 2048 replace existing parallelism 3 without prompting && db2 rollforward database ${MAXDB} complete && db2 terminate"
+  /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} without prompting && db2 rollforward database ${MAXDB} to end of logs and stop && db2 terminate"
   db2stop
   rm ${BACKUPDIR}/*
 fi

@@ -29,12 +29,12 @@ mxe.useAppServerSecurity=0
 mxe.rmi.enabled=0
 
 # Database Configuration Parameters
-Database.UserSpecifiedJDBCURL=jdbc:db2://${DB_HOST_NAME}:${DB_PORT}/${MAXDB}
+Database.UserSpecifiedJDBCURL=jdbc:db2://${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}
 Database.AutomateConfig=false
 Database.Vendor=DB2
 Database.DB2.DatabaseName=${MAXDB}
-Database.DB2.ServerHostName=${DB_HOST_NAME}
-Database.DB2.ServerPort=${DB_PORT}
+Database.DB2.ServerHostName=${MAXDB_SERVICE_HOST}
+Database.DB2.ServerPort=${MAXDB_SERVICE_PORT}
 Database.DB2.DataTablespaceName=MAXDATA
 Database.DB2.TempTablespaceName=MAXTEMP
 Database.DB2.Vargraphic=true

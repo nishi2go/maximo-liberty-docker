@@ -28,12 +28,15 @@ NAME_SPACE="maximo-liberty"
 REMOVE=0
 SKIP_DB=0
 QUIET=-q
+PRUNE=0
+ADD_LATEST_TAG=1
+REMOTE_REGISTRY=""
 
 # Usage: remove "tag name" "version" "product name"
 function remove {
   image_id=`${DOCKER} images -q --no-trunc ${NAME_SPACE}/${1}:${2}`
   if [[ ! -z "${image_id}" ]]; then
-    echo "An old ${3} image exists. Remove it."
+    echo "${3} image exists. Remove it."
     container_ids=`${DOCKER} ps -aq --no-trunc -f ancestor=${image_id}`
     if [[ ! -z "${container_ids}" ]]; then
       ${DOCKER} rm -f ${container_ids}
@@ -45,7 +48,10 @@ function remove {
 # Usage: build "tag name" "version" "target directory name" "product name"
 function build {
   echo "Start to build ${4} image"
-  ${DOCKER} build ${QUIET} ${5} --rm ${EXTRA_BUILD_ARGS} ${DEFAULT_BUILD_ARGS} -t ${NAME_SPACE}/${1}:${2} -t ${NAME_SPACE}/${1}:latest ${3} || exit 1
+  if [[ ${ADD_LATEST_TAG} -eq 1 ]]; then
+    LT="-t ${NAME_SPACE}/${1}:latest"
+  fi
+  ${DOCKER} build ${QUIET} ${5} --rm ${EXTRA_BUILD_ARGS} ${DEFAULT_BUILD_ARGS} -t ${NAME_SPACE}/${1}:${2} ${LT} ${3} || exit 1
 
   exists=`${DOCKER} images -q --no-trunc ${NAME_SPACE}/${1}:${2}`
   if [[ -z "${exists}" ]]; then
@@ -53,6 +59,16 @@ function build {
     exit 2
   fi
   echo "Completed ${4} image creation."
+}
+
+# Usage: push "tag name" "version" "product name"
+function push {
+  if [[ -n "${REMOTE_REGISTRY}" ]]; then
+    echo "Start to push ${3} image"
+    ${DOCKER} tag ${QUIET} ${NAME_SPACE}/${1}:${2} ${REMOTE_REGISTRY}/${NAME_SPACE}/${1}:${2} || exit 1
+    ${DOCKER} push ${QUIET} ${REMOTE_REGISTRY}/${NAME_SPACE}/${1}:${2} || exit 1
+    echo "Completed to push the ${3} image."
+  fi
 }
 
 while [[ $# -gt 0 ]]; do
@@ -65,7 +81,7 @@ while [[ $# -gt 0 ]]; do
         REMOVE=1
         REMOVE_ONLY=1
         ;;
-      --skip-db )
+      -s | --skip-db )
         SKIP_DB=1
         ;;
       -h | --help )
@@ -77,8 +93,17 @@ while [[ $# -gt 0 ]]; do
       -c | --use-custom-image )
         USE_CUSTOM_IMAGE=1
         ;;
+      -rt | --remove-latest-tag )
+        ADD_LATEST_TAG=0
+        ;;
       -v | --verbose )
         QUIET=""
+        ;;
+      -p | --prune )
+        PRUNE=1
+        ;;
+      "--push-registry="* )
+        REMOTE_REGISTRY="${key#*=}"
         ;;
     esac
     shift
@@ -90,12 +115,15 @@ Usage: build.sh [OPTIONS]
 
 Build Maximo Docker containers.
 
--r | --remove           Remove images when an image exists in repository
--R | --remove-only      Remove images without building when an image exists in repository
--c | --use-custom-image Build a custom image for Maximo installation container
--v | --verbose          Output verbosity in docker build
---skip-db               Skip building and removing a DB image
--h | --help             Show this help text
+-r  | --remove                 Remove images when an image exists in repository.
+-R  | --remove-only            Remove images without building when an image exists in repository.
+-rt | --remove-latest-tag      Do not add the letest tag to the built images.
+-c  | --use-custom-image       Build a custom image for Maximo installation container.
+-v  | --verbose                Output verbosity in docker build.
+-p  | --prune                  Remove intermediate multi-stage builds automatically.
+-s  | --skip-db                Skip building and removing a DB image.
+--push-registry=REGISTRY_URL  Push the built images to a specified remote Docker registry.
+-h  | --help                   Show this help text.
 EOF
   exit 1
 fi
@@ -117,7 +145,6 @@ if [[ ${REMOVE} -eq 1 ]]; then
   remove "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management"
   remove "maximo-base" "${MAXIMO_VER}" "IBM Maximo Asset Management base"
   remove "liberty" "${WAS_VER}" "IBM WebSphere Application Server Liberty base"
-  remove "ibmim" "${IM_VER}" "IBM Installation Manager"
   remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
   remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
 
@@ -135,9 +162,6 @@ echo "Start building..."
 # Build base image container
 build "images" "${MAXIMO_VER}" "images" "Image Container"
 
-# Build IBM Installation Manager image
-build "ibmim" "${IM_VER}" "ibmim" "IBM Installation Manager"
-
 if [[ ${USE_CUSTOM_IMAGE} -eq 1 ]]; then
   # Build IBM Maximo Asset Management image
   build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes"
@@ -148,10 +172,12 @@ else
   # Build IBM Maximo Asset Management image
   build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" 
 fi
+push "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management" 
 
 # Build IBM Db2 Advanced Workgroup Edition image
 if [[ $SKIP_DB -eq 0 ]]; then
-  build "db2" "$DB2_VER" "maxdb" "IBM Db2 Advanced Workgroup Server Edition" 
+  build "db2" "${MAXIMO_VER}" "maxdb" "IBM Db2 Advanced Workgroup Server Edition" 
+  push "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition" 
 fi
 
 # Build IBM WebSphere Liberty base image
@@ -159,26 +185,45 @@ build "liberty" "${WAS_VER}" "liberty" "IBM WebSphere Application Server Liberty
 
 # Build IBM WebSphere Liberty JMS server image
 build "jmsserver" "${WAS_VER}" "jmsserver" "IBM WebSphere Application Server Liberty JMS server"
+push "jmsserver" "${WAS_VER}" "IBM WebSphere Application Server Liberty JMS server"
 
 # Build IBM WebSphere Liberty for Maximo UI image
 build "maximo-ui" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo UI" "--build-arg maximoapp=maximo-ui"
+push "maximo-ui" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo UI"
 
 # Build IBM WebSphere Liberty for Maximo Crontask image
 build "maximo-cron" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo Crontask" "--build-arg maximoapp=maximo-cron"
+push "maximo-cron" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo Crontask"
 
 # Build IBM WebSphere Liberty for Maximo API image
 build "maximo-api" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo API" "--build-arg maximoapp=maximo-api"
+push "maximo-api" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo API"
 
 # Build IBM WebSphere Liberty for Maximo Report Server image
 build "maximo-report" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo Reporting" "--build-arg maximoapp=maximo-report"
+push "maximo-report" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo Reporting"
 
 # Build IBM WebSphere Liberty for Maximo MEA image
 build "maximo-mea" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo MEA" "--build-arg maximoapp=maximo-mea"
+push "maximo-mea" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo MEA"
 
 # Build IBM WebSphere Liberty for JMS Consumer image
 build "maximo-jmsconsumer" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer" "--build-arg maximoapp=maximo-jmsconsumer"
+push "maximo-jmsconsumer" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
 
 # Build Frontend Proxy Server
 build "frontend-proxy" "${PROXY_VER}" "frontend-proxy" "Frontend Proxy Server"
+
+# Cleanup Maximo Image build
+if [[ $PRUNE -eq 1 ]]; then
+  list=$(docker images -q -f "dangling=true" -f "label=autodelete=true")
+  if [ -n "$list" ]; then
+      docker rmi $list
+  fi 
+  
+  remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+fi
+
+
 
 echo "Done"

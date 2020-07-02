@@ -12,5 +12,5 @@ add_langs=de,fr
 admin_email_address=root@localhost
 smtp_server_host_name=localhost
 skin=iot18
-enable_demo_data=no
+enable_demo_data=yes
 enable_jms=yes

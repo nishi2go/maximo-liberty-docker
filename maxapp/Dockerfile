@@ -36,14 +36,20 @@ RUN touch /config/maximo.properties && chown 1001.0 /config/maximo.properties &&
 USER 1001
 COPY --chown=1001:0 maximo.properties.template /config/
 
+# Default setting for the verbose option
+ARG VERBOSE=false
+
+# This script will add the requested XML snippets, grow image to be fit-for-purpose and apply interim fixes
+RUN configure.sh
+
 ENV ADMIN_USER_NAME=admin
 ENV ADMIN_PASSWORD=changeit
-ENV JMS_SERVER_HOST=jmsserver
-ENV JMS_SERVER_PORT=9011
+ENV MAXIMO_JMS_SERVICE_HOST=jmsserver
+ENV MAXIMO_JMS_SERVICE_PORT=7276
 ENV GEN_MAXIMO_PROPERTIES=yes
 ENV DB_MAXIMO_PASSWORD=changeit
-ENV DB_HOST_NAME=maxdb
-ENV DB_PORT=50005
+ENV MAXDB_SERVICE_HOST=maxdb
+ENV MAXDB_SERVICE_PORT=50005
 ENV MAXDB=maxdb76
 #ENV JVM_HEAP_MAX_SIZE=4092m
 #ENV JVM_HEAP_MIN_SIZE=512m

@@ -31,4 +31,16 @@ FROM maximo-liberty/maximo-base:${buildver}
 #COPY --from=0 /images/OG7610_ifixes.20200316-0706.zip /work/oag/
 #RUN unzip -o OG7610_ifixes.20200316-0706.zip -d /opt/IBM/SMP/maximo/ && rm -rf /work/oag/*
 
+RUN mkdir /work/ifix
+WORKDIR /work/ifix
+COPY --from=0 /images/MIF_7611_IFIX.20200402-0958.im.zip /work/ifix/
+COPY --from=0 /images/TPAE_7611_IFIX.20200421-0944.im.zip /work/ifix/
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.tivoli.tpae.base.tpae.main.20200402-0958 \
+ -repositories /work/ifix/MIF_7611_IFIX.20200402-0958.im.zip \
+ -installationDirectory /opt/IBM/SMP -acceptLicense \ 
+ && /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.tivoli.tpae.base.tpae.main.20200421-0944 \
+ -repositories /work/ifix/TPAE_7611_IFIX.20200421-0944.im.zip \
+ -installationDirectory /opt/IBM/SMP -acceptLicense \
+ && rm -rf /work/ifix
+
 RUN /work/buildwars.sh
