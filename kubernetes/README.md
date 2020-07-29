@@ -23,7 +23,7 @@ The document describes how to deploy Maximo on Docker to a Kubernetes environmen
       containers:
       - env:
         ...
-        image: registry.example.com:5000/maximo-liberty/maximo-ui:7.6.1.1
+        image: registry.example.com:5000/maximo-liberty/maximo-ui:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: maximo-ui
         ...
@@ -34,7 +34,7 @@ The document describes how to deploy Maximo on Docker to a Kubernetes environmen
 
 2. Build and push Maximo Docker images by using ``build.sh``.
 
-    You can use the build tool in Maximo on Docker to build and push the images to a Docker registry. The build tool has an option to push built images to an external registry with ```--push-registry=REGISTRY_URL```. Each built image is automatically tagged and pushed to the external registry by using the option e.g. ```registry.example.com:5000/maximo-docker/maximo-ui:7.6.1.1``` from ```maximo-liberty/maximo-ui:7.6.1.1```.
+    You can use the build tool in Maximo on Docker to build and push the images to a Docker registry. The build tool has an option to push built images to an external registry with ```--push-registry=REGISTRY_URL```. Each built image is automatically tagged and pushed to the external registry by using the option e.g. ```registry.example.com:5000/maximo-docker/maximo-ui:7.6.1.2``` from ```maximo-liberty/maximo-ui:7.6.1.2```.
 
     For example:
     ```bash

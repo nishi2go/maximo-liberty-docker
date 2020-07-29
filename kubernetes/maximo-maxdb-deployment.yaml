@@ -75,7 +75,7 @@ spec:
              secretKeyRef:
                 name: maximo-maxdb-credential
                 key: password
-        image: localhost:32000/maximo-liberty/db2:7.6.1.1
+        image: localhost:32000/maximo-liberty/db2:7.6.1.2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -107,7 +107,7 @@ spec:
         securityContext:
           privileged: true
       initContainers:
-      - image: localhost:32000/maximo-liberty/db2:7.6.1.1
+      - image: localhost:32000/maximo-liberty/db2:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: init-maxdb
         volumeMounts:

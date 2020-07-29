@@ -136,7 +136,7 @@ spec:
           value: accept
         - name: WLP_LOGGING_CONSOLE_LOGLEVEL
           value: info
-        image: localhost:32000/maximo-liberty/maximo-ui:7.6.1.1
+        image: localhost:32000/maximo-liberty/maximo-ui:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: maximo-ui
         resources:
@@ -233,7 +233,7 @@ spec:
           value: accept
         - name: WLP_LOGGING_CONSOLE_LOGLEVEL
           value: info
-        image: localhost:32000/maximo-liberty/maximo-cron:7.6.1.1
+        image: localhost:32000/maximo-liberty/maximo-cron:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: maximo-cron
         resources:

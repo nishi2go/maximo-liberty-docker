@@ -13,9 +13,9 @@
 # limitations under the License.
 
 JMS_OPT="no"
-MAXIMO_VER="${MAXIMO_VER:-7.6.1.1}"
+MAXIMO_VER="${MAXIMO_VER:-7.6.1.2}"
 IM_VER="${IM_VER:-1.8.8}"
-WAS_VER="${WAS_VER:-19.0.0.6-webProfile8}"
+WAS_VER="${WAS_VER:-19.0.0.12-kernel-java8-ibmjava}"
 DB2_VER="${DB2_VER:-11.1.4a}"
 PROXY_VER="${PROXY_VER:-1.8}"
 DEFAULT_BUILD_ARGS=""
@@ -39,9 +39,12 @@ function remove {
     echo "${3} image exists. Remove it."
     container_ids=`${DOCKER} ps -aq --no-trunc -f ancestor=${image_id}`
     if [[ ! -z "${container_ids}" ]]; then
-      ${DOCKER} rm -f ${container_ids}
+      ${DOCKER} container rm -f ${container_ids}
     fi
-    ${DOCKER} rmi -f "${image_id}"
+    ${DOCKER} image rm -f "${image_id}"
+  fi
+  if [[ -n "${REMOTE_REGISTRY}" ]]; then
+    ${DOCKER} image rm ${REMOTE_REGISTRY}/${NAME_SPACE}/${1}:${2}
   fi
 }
 
@@ -105,6 +108,9 @@ while [[ $# -gt 0 ]]; do
       "--push-registry="* )
         REMOTE_REGISTRY="${key#*=}"
         ;;
+      "--namespace="* )
+        NAME_SPACE="${key#*=}"
+        ;;
     esac
     shift
 done
@@ -117,12 +123,13 @@ Build Maximo Docker containers.
 
 -r  | --remove                 Remove images when an image exists in repository.
 -R  | --remove-only            Remove images without building when an image exists in repository.
--rt | --remove-latest-tag      Do not add the letest tag to the built images.
+-rt | --remove-latest-tag      Do not add the "letest" tag to the built images.
 -c  | --use-custom-image       Build a custom image for Maximo installation container.
--v  | --verbose                Output verbosity in docker build.
+-v  | --verbose                Show detailed output of the docker build.
 -p  | --prune                  Remove intermediate multi-stage builds automatically.
 -s  | --skip-db                Skip building and removing a DB image.
---push-registry=REGISTRY_URL  Push the built images to a specified remote Docker registry.
+--push-registry=REGISTRY_URL   Push the built images to a specified remote Docker registry.
+--namespace=NAMESPACE          Specify the namespace of the Docker images (default: maximo-liberty).
 -h  | --help                   Show this help text.
 EOF
   exit 1
@@ -134,7 +141,7 @@ if [[ ${REMOVE} -eq 1 ]]; then
   echo "Remove old images..."
   remove "jmsserver" "${WAS_VER}" "IBM WebSphere Application Server Liberty JMS server"
   if [[ ${SKIP_DB} -eq 0 ]]; then
-    remove "db2" "${DB2_VER}" "IBM Db2 Advanced Workgroup Server Edition"
+    remove "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition"
   fi
   remove "maximo-ui" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo UI"
   remove "maximo-api" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo API"
@@ -146,7 +153,7 @@ if [[ ${REMOVE} -eq 1 ]]; then
   remove "maximo-base" "${MAXIMO_VER}" "IBM Maximo Asset Management base"
   remove "liberty" "${WAS_VER}" "IBM WebSphere Application Server Liberty base"
   remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
-  remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
+#  remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
 
   if [[ ${REMOVE_ONLY} -eq 1 ]]; then
     exit
@@ -175,7 +182,7 @@ fi
 push "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management" 
 
 # Build IBM Db2 Advanced Workgroup Edition image
-if [[ $SKIP_DB -eq 0 ]]; then
+if [[ ${SKIP_DB} -eq 0 ]]; then
   build "db2" "${MAXIMO_VER}" "maxdb" "IBM Db2 Advanced Workgroup Server Edition" 
   push "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition" 
 fi
@@ -212,10 +219,11 @@ build "maximo-jmsconsumer" "${MAXIMO_VER}" "maxapp" "IBM WebSphere Application S
 push "maximo-jmsconsumer" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
 
 # Build Frontend Proxy Server
-build "frontend-proxy" "${PROXY_VER}" "frontend-proxy" "Frontend Proxy Server"
+#build "frontend-proxy" "${PROXY_VER}" "frontend-proxy" "Frontend Proxy Server"
 
 # Cleanup Maximo Image build
 if [[ $PRUNE -eq 1 ]]; then
+  echo "Cleanup intermediate images."
   list=$(docker images -q -f "dangling=true" -f "label=autodelete=true")
   if [ -n "$list" ]; then
       docker rmi $list

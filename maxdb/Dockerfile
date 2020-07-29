@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ARG buildver=7.6.1.1
+ARG buildver=7.6.1.2
 FROM maximo-liberty/images:${buildver}
 
 FROM maximo-liberty/maximo:${buildver}
