@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ARG libertyver=19.0.0.6-webProfile8
+ARG libertyver=19.0.0.12-kernel-java8-ibmjava
 FROM maximo-liberty/liberty:${libertyver}
 LABEL maintainer="nishi2go@gmail.com"
 

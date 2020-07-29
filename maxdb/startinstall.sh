@@ -67,7 +67,7 @@ rm /work/db2/db2rfe.cfg
 # Run Configuration Tool
 export BYPASS_PRS=True
 ${SMP}/ConfigTool/scripts/reconfigurePae.sh -action deployConfiguration \
-  -bypassJ2eeValidation -inputfile "${CONFIG_FILE}" "${DEMO_DATA}" || exit 1
+  -bypassJ2eeValidation -inputfile "${CONFIG_FILE}" "${DEMO_DATA}"
 
 INSTALL_PROPERTIES=${SMP}/etc/install.properties
 sed -ie "s/^ApplicationServer.Vendor=.*/ApplicationServer.Vendor=WebSphereLiberty/" "${INSTALL_PROPERTIES}"

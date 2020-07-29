@@ -9,15 +9,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ARG buildver=7.6.1.1
+ARG buildver=7.6.1.2
 
 FROM maximo-liberty/images:${buildver}
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 LABEL maintainer="nishi2go@gmail.com"
 
 ARG update_im=no
-ARG fp=1
+ARG fp=2
 ARG db_alias=MAXDB76
 ARG enable_jms=yes
 ARG install_fp=yes

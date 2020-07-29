@@ -26,8 +26,8 @@ Before you start, learn more about Maximo WebSphere Liberty support from the off
 
 * Feature Pack/Fix Pack binaries from [Fix Central](http://www-945.ibm.com/support/fixcentral/)
 
-  IBM Maximo Asset Management V7.6.1 Feature pack 1 binary:
-  * MAMMTFP7611IMRepo.zip
+  IBM Maximo Asset Management V7.6.1 Feature pack 2 binary:
+  * MAMMTFP7612IMRepo.zip
 
   IBM Db2 Server V11.1 Fix Pack 4 Mod 1
   * v11.1.4fp4a_linuxx64_server_t.tar.gz
@@ -71,7 +71,7 @@ Procedures:
     wlp-nd-license.jar
     DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz
     IED_V1.8.8_Wins_Linux_86.zip
-    MAMMTFP7611IMRepo.zip
+    MAMMTFP7612IMRepo.zip
     v11.1.4fp4a_linuxx64_server_t.tar.gz
     ```
 3. Run the build tool
@@ -103,7 +103,7 @@ See the [Maximo on Kubernetes](https://github.com/nishi2go/maximo-liberty-docker
 
 ## How to use a custom build image.
 
-To install industry solutions e.g. Oil & Gas, Service Providers and the other offerings, you can use a custom Maximo dockerfile which aims to extend the original Maximo installation container. A sample script ``` custom/Dockerfile ``` allows to run IBM Installation Manager, unzip Interim Fixes and/or etc at a build time. You can find a Maximo for Oil & Gas sample in the dockerfile. Please uncomment the section in the file to install the Maximo for Oil & Gas V7.6.1 onto Maximo Asset Management V7.6.1.1.
+To install industry solutions e.g. Oil & Gas, Service Providers and the other offerings, you can use a custom Maximo dockerfile which aims to extend the original Maximo installation container. A sample script ``` custom/Dockerfile ``` allows to run IBM Installation Manager, unzip Interim Fixes and/or etc at a build time. You can find a Maximo for Oil & Gas sample in the dockerfile. Please uncomment the section in the file to install the Maximo for Oil & Gas V7.6.1 onto Maximo Asset Management V7.6.1.2.
 
 #### Sample steps to install Maximo for Oil and Gas Industry Solution.
 

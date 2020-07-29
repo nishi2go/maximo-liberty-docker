@@ -9,8 +9,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ARG buildver=7.6.1.1
-ARG libertyver=19.0.0.6-webProfile8
+ARG buildver=7.6.1.2
+ARG libertyver=19.0.0.12-kernel-java8-ibmjava
 FROM maximo-liberty/images:${buildver}
 FROM websphere-liberty:${libertyver}
 

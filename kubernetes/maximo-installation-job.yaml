@@ -57,7 +57,7 @@ spec:
           value: "no"
         - name: ENABLE_DEMO_DATA
           value: "no"
-        image: localhost:32000/maximo-liberty/maximo:7.6.1.1
+        image: localhost:32000/maximo-liberty/maximo:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: maximo-inst
       restartPolicy: Never
