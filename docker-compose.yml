@@ -256,7 +256,6 @@ services:
     image: traefik:v2.2 # The official v2 Traefik docker image
     ports:
       - "80:80"
-      - "8080:8080"
     command:
       # - "--log.level=DEBUG"
       - "--api.insecure=true"
