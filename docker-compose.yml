@@ -230,7 +230,7 @@ services:
   #     - maximo:/maximo
 
   jmsserver:
-    image: maximo-liberty/jmsserver:19.0.0.12-kernel-java8-ibmjava
+    image: maximo-liberty/jmsserver:20.0.0.3-kernel-java8-ibmjava
     environment:
       - LICENSE=accept
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
@@ -256,7 +256,6 @@ services:
     image: traefik:v2.2 # The official v2 Traefik docker image
     ports:
       - "80:80"
-      - "8080:8080"
     command:
       # - "--log.level=DEBUG"
       - "--api.insecure=true"

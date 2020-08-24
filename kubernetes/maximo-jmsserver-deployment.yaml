@@ -50,7 +50,11 @@ spec:
           value: accept
         - name: WLP_LOGGING_CONSOLE_LOGLEVEL
           value: info
-        image: localhost:32000/maximo-liberty/jmsserver:19.0.0.6-webProfile8
+        - name: SEC_TLS_TRUSTDEFAULTCERTS
+          value: "true"
+        - name: SEC_IMPORT_K8S_CERTS
+          value: "true"
+        image: localhost:32000/maximo-liberty/jmsserver:20.0.0.3-webProfile8
         imagePullPolicy: IfNotPresent
         name: maximo-jms
         resources:

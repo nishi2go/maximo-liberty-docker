@@ -40,7 +40,7 @@ then
   cp "${MAXIMO_DIR}/maximo.properties" /config/
 else
   wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is up"
-  cat /config/maximo.properties.template | envsubst > /config/maximo.properties
+  cat "${MAXIMO_DIR}/maximo.properties.template" | envsubst > /config/maximo.properties
 fi
 
 if [ -z "${LIBERTY_CMD}" ]

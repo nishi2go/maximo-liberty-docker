@@ -86,6 +86,10 @@ spec:
           value: accept
         - name: WLP_LOGGING_CONSOLE_LOGLEVEL
           value: info
+        - name: SEC_TLS_TRUSTDEFAULTCERTS
+          value: "true"
+        - name: SEC_IMPORT_K8S_CERTS
+          value: "true"
         image: localhost:32000/maximo-liberty/maximo-api:7.6.1.2
         imagePullPolicy: IfNotPresent
         name: maximo-api
@@ -105,18 +109,21 @@ spec:
             protocol: TCP
         livenessProbe:
             httpGet:
-              path: /maximoapi/oslc/bamessages/iface
+              path: /maximoapi/oslc/bamessages/iface/
               port: http
+            timeoutSeconds: 10
             periodSeconds: 10
         readinessProbe:
             httpGet:
-              path: /maximoapi/oslc/bamessages/iface
+              path: /maximoapi/oslc/bamessages/iface/
               port: http
+            timeoutSeconds: 10
             periodSeconds: 10
         startupProbe:
             httpGet:
-              path: /maximoapi/oslc/bamessages/iface
+              path: /maximoapi/oslc/bamessages/iface/
               port: http
+            timeoutSeconds: 10
             initialDelaySeconds: 60
             failureThreshold: 300
             periodSeconds: 10

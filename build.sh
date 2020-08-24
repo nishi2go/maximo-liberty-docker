@@ -15,7 +15,7 @@
 JMS_OPT="no"
 MAXIMO_VER="${MAXIMO_VER:-7.6.1.2}"
 IM_VER="${IM_VER:-1.8.8}"
-WAS_VER="${WAS_VER:-19.0.0.12-kernel-java8-ibmjava}"
+WAS_VER="${WAS_VER:-20.0.0.3-kernel-java8-ibmjava}"
 DB2_VER="${DB2_VER:-11.1.4a}"
 PROXY_VER="${PROXY_VER:-1.8}"
 DEFAULT_BUILD_ARGS=""
