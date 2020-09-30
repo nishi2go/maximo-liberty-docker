@@ -10,13 +10,6 @@ services:
       - backend
     ports:
       - "${ENV_MAXDB_SERVICE_PORT}:${ENV_MAXDB_SERVICE_PORT}"
-    volumes:
-      - type: volume
-        source: maxdb76
-        target: /home/ctginst1/ctginst1
-#      - type: bind
-#        source: ./backup
-#        target: /backup
     ulimits:
       nproc: 8192
       nofile: 65535
@@ -27,6 +20,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    volumes:
+      - type: volume
+        source: maxdb76
+        target: /home/ctginst1/ctginst1
+#      - type: bind
+#        source: ./backup
+#        target: /backup
   
   # maximo:
   #   image: maximo-liberty/maximo:7.6.1.2
@@ -72,7 +72,7 @@ services:
       - "traefik.docker.network=maximo-docker-liberty_frontend"
       - "traefik.http.routers.maximo-ui.entrypoints=web"
       - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
-      - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo/`) || PathPrefix(`/maximo-x/`)"
+      - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo`) || PathPrefix(`/maximo-x`)"
     depends_on:
       - maxdb
       - jmsserver
@@ -125,7 +125,7 @@ services:
   #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-api.entrypoints=web"
   #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
-  #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi/`)"
+  #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi`)"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -156,7 +156,7 @@ services:
   #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-report.entrypoints=web"
   #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
-  #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport/`)"
+  #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport`)"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -187,7 +187,7 @@ services:
   #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-mea.entrypoints=web"
   #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
-  #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb/`)"
+  #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -218,7 +218,7 @@ services:
   #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-jmsconsumer.entrypoints=web"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
-  #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer/`)"    
+  #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer`)"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
