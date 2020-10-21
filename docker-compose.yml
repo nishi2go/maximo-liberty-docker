@@ -65,6 +65,7 @@ services:
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - WLP_LOGGING_CONSOLE_LOGLEVEL=info
+      - MXE_CRONTASK_DONOTRUN=ALL
     ports:
       - "9080:9080"
     labels:
@@ -118,6 +119,7 @@ services:
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+  #     - MXE_CRONTASK_DONOTRUN=ALL
   #   ports:
   #     - "9081:9081"
   #   labels:
@@ -149,6 +151,7 @@ services:
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+  #     - MXE_CRONTASK_DONOTRUN=ALL
   #   ports:
   #     - "9082:9081"
   #   labels:
@@ -180,6 +183,7 @@ services:
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+  #     - MXE_CRONTASK_DONOTRUN=ALL
   #   ports:
   #     - "9084:9084"
   #   labels:
@@ -211,6 +215,7 @@ services:
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+  #     - MXE_CRONTASK_DONOTRUN=ALL
   #   ports:
   #     - "9083:9083"
   #   labels:
