@@ -14,11 +14,12 @@
 
 JMS_OPT="no"
 MAXIMO_VER="${MAXIMO_VER:-7.6.1.2}"
+FP_VER="${FP_VER:-2}"
 IM_VER="${IM_VER:-1.8.8}"
 WAS_VER="${WAS_VER:-20.0.0.3-kernel-java8-ibmjava}"
 DB2_VER="${DB2_VER:-11.1.4a}"
 PROXY_VER="${PROXY_VER:-1.8}"
-DEFAULT_BUILD_ARGS=""
+DEFAULT_BUILD_ARGS=" --build-arg buildver=${MAXIMO_VER} "
 DEFAULT_BUILD_ARGS_FILE="build.args"
 
 DOCKER="${DOCKER_CMD:-docker}"
@@ -54,7 +55,7 @@ function build {
   if [[ ${ADD_LATEST_TAG} -eq 1 ]]; then
     LT="-t ${NAME_SPACE}/${1}:latest"
   fi
-  ${DOCKER} build ${QUIET} ${5} --rm ${EXTRA_BUILD_ARGS} ${DEFAULT_BUILD_ARGS} -t ${NAME_SPACE}/${1}:${2} ${LT} ${3} || exit 1
+  ${DOCKER} build ${QUIET}  ${5}  ${EXTRA_BUILD_ARGS}  ${DEFAULT_BUILD_ARGS}  --rm -t ${NAME_SPACE}/${1}:${2} ${LT} ${3} || exit 1
 
   exists=`${DOCKER} images -q --no-trunc ${NAME_SPACE}/${1}:${2}`
   if [[ -z "${exists}" ]]; then
@@ -171,19 +172,19 @@ build "images" "${MAXIMO_VER}" "images" "Image Container"
 
 if [[ ${USE_CUSTOM_IMAGE} -eq 1 ]]; then
   # Build IBM Maximo Asset Management image
-  build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes"
+  build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes --build-arg fp=${FP_VER}"
 
   # Build IBM Maximo Asset Management Custom image
   build "maximo" "${MAXIMO_VER}" "custom" "IBM Maximo Asset Management Custom Image"
 else
   # Build IBM Maximo Asset Management image
-  build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" 
+  build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg fp=${FP_VER}"
 fi
 push "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management" 
 
 # Build IBM Db2 Advanced Workgroup Edition image
 if [[ ${SKIP_DB} -eq 0 ]]; then
-  build "db2" "${MAXIMO_VER}" "maxdb" "IBM Db2 Advanced Workgroup Server Edition" 
+  build "db2" "${MAXIMO_VER}" "maxdb" "IBM Db2 Advanced Workgroup Server Edition"
   push "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition" 
 fi
 
@@ -231,7 +232,5 @@ if [[ $PRUNE -eq 1 ]]; then
   
   remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
 fi
-
-
 
 echo "Done"
