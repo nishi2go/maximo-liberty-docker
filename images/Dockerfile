@@ -29,7 +29,7 @@ COPY backup/* /backup/
 
 # Unpack the Db2 packages
 ARG db_ver=11.1
-ARG db_fp=4fp4a
+ARG db_fp
 ENV DB2_IMAGE=DB2_AWSE_REST_Svr_${db_ver}_Lnx_86-64.tar.gz
 ENV DB2_FP_IMAGE=v${db_ver}.${db_fp}_linuxx64_server_t.tar.gz
 RUN mkdir /db2 && tar zxpf /images/${DB2_IMAGE} -C /db2
