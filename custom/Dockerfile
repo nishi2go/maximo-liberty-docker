@@ -19,17 +19,57 @@ FROM maximo-liberty/images:${buildver}
 FROM maximo-liberty/maximo-base:${buildver}
 
 ## Put the custom installation here or remove comments
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work
+COPY installis.sh /work/
+RUN chmod +x /work/installis.sh
+
 ## Sample scripts for Oil & Gas Industry Solution
-#RUN mkdir /work/oag
-#WORKDIR /work/oag
-#RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-#COPY --from=0 /images/Max_Oil_and_Gas_761.zip /work/oag/
-#RUN unzip Max_Oil_and_Gas_761.zip && unzip oilandgas_7.6.1_launchpad.zip \
-#  && /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.tivoli.tpae.IS.OilAndGas \
-# -repositories /work/oag/OilAndGasInstallerRepository.zip \
-# -installationDirectory /opt/IBM/SMP -acceptLicense && rm -rf /work/oag/*
-#COPY --from=0 /images/OG7610_ifixes.20200316-0706.zip /work/oag/
-#RUN unzip -o OG7610_ifixes.20200316-0706.zip -d /opt/IBM/SMP/maximo/ && rm -rf /work/oag/*
+# ENV IMAGE_NAME Max_Oil_and_Gas_761.zip
+# ENV IS_ID com.ibm.tivoli.tpae.IS.OilAndGas
+# ENV REPO_FILE OilAndGasInstallerRepository.zip
+# ENV WDIR /work/oag
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/${IMAGE_NAME} ${WDIR}/
+# RUN /work/installis.sh --image=${IMAGE_NAME} \
+#  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/OG7610_ifixes.20200316-0706.zip ${WDIR}/
+# RUN unzip -o OG7610_ifixes.20200316-0706.zip -d /opt/IBM/SMP/maximo/ && rm -rf ${WDIR}*
+# WORKDIR /work
+
+## Sample scripts for Maximo Scheduler Add on
+# ENV IMAGE_NAME MAM_Scheduler_7.6.7.zip
+# ENV IS_ID com.ibm.tivoli.tpae.IS.Scheduler
+# ENV REPO_FILE SchedulerInstallerRepository.zip
+# ENV WDIR /work/sch
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/${IMAGE_NAME} ${WDIR}/
+# RUN /work/installis.sh --image=${IMAGE_NAME} \
+#  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
+
+## Sample scripts for Maximo Linear Add on
+# ENV IMAGE_NAME MAX_LNEAR_AST_MGR_7.6.1_MP_ML.zip
+# ENV IS_ID com.ibm.tivoli.tpae.IS.Linear
+# ENV REPO_FILE LinearInstallerRepository.zip
+# ENV WDIR /work/lin
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/${IMAGE_NAME} ${WDIR}/
+# RUN /work/installis.sh --image=${IMAGE_NAME} \
+#  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
+
+## Sample scripts for Maximo for Service Providers Add on
+# ENV IMAGE_NAME MAM_SP_V7.6.3_EIMAGE.zip
+# ENV FP_IMAGE_NAME 7.6.3.4-TIV-SPRMA-FP0004.zip
+# ENV IS_ID com.ibm.tivoli.tpae.IS.ServiceProvider
+# ENV REPO_FILE ServiceProviderInstallerRepository.zip
+# ENV WDIR /work/msp
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/${IMAGE_NAME} ${WDIR}/
+# COPY --from=0 /images/${FP_IMAGE_NAME} ${WDIR}/
+# RUN /work/installis.sh --image=${IMAGE_NAME} --image-fp=${FP_IMAGE_NAME} \
+#  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
 
 
 RUN /work/buildwars.sh
