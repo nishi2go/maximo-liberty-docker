@@ -31,3 +31,4 @@ RUN java -jar /tmp/wlp-nd-license.jar --acceptLicense /opt/ibm \
  && rm /tmp/wlp-nd-license.jar
 
 ENV KEYSTORE_REQUIRED false
+ENV SEC_TLS_TRUSTDEFAULTCERTS true

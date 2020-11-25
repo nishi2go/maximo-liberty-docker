@@ -82,7 +82,7 @@ RUN if [ "${deploy_db_on_build}" = "yes" ]; then /work/db2/startinstall.sh; else
 USER ctginst1
 WORKDIR /work/backup
 
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 LABEL maintainer="nishi2go@gmail.com"
 
