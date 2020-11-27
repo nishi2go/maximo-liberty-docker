@@ -1,4 +1,4 @@
-# Building and deploying an IBM Maximo Asset Management V7.6.1 with Liberty image to Docker.
+# Building and deploying IBM Maximo Asset Management V7.6.1 with Liberty images to Docker.
 
 Maximo with Liberty on Docker enables to run Maximo Asset Management with WebSphere Liberty on Docker. The images are deployed fine-grained services instead of a single instance. The following instructions describe how to set up IBM Maximo Asset Management V7.6 Docker images. These images consist of several components e.g. WebSphere Liberty, Db2, and Maximo installation program.
 
