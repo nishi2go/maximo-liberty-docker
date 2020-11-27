@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if [[ "${deploy_db_on_build}" == "no" ]]
+then
+  echo "Skip database deployment."
+  exit
+fi
+
+mkdir -p ${BACKUPDIR}
+chown ctginst1.ctggrp1 ${BACKUPDIR}
+
 # Clear old deployment files first
 SMP="/opt/IBM/SMP"
 
@@ -25,6 +34,12 @@ export MXINTADM_PASSWORD=${mxintadm_password}
 export MAXADMIN_PASSWORD=${maxadmin_password}
 export MAXREG_PASSWORD=${maxreg_password}
 export MAXDB_SERVICE_HOST=localhost
+export MAXDB_SERVICE_HOST_IP=127.0.0.1
+export JDBC_URL=jdbc:db2://localhost:${MAXDB_SERVICE_PORT}/${MAXDB}
+export DB_TABLE_SPACE=MAXDATA
+export DB_TEMP_SPACE=MAXTEMP
+export DB_INDEX_SPACE=MAXINDEX
+export DB_VENDOR=DB2
 export DB_MAXIMO_PASSWORD=${db_maximo_password}
 export BASE_LANG=${base_lang}
 export ADD_LANGS=${add_langs}
@@ -80,7 +95,7 @@ su - ctginst1 <<- EOS
  db2 CONNECT TO ${MAXDB}
  db2 QUIESCE DATABASE IMMEDIATE FORCE CONNECTIONS
  db2 CONNECT RESET
- db2 BACKUP DATABASE ${MAXDB} TO /work/backup WITH 4 BUFFERS BUFFER 2048 PARALLELISM 2 COMPRESS WITHOUT PROMPTING
+ db2 BACKUP DATABASE ${MAXDB} TO ${BACKUPDIR} WITH 4 BUFFERS BUFFER 2048 PARALLELISM 2 COMPRESS WITHOUT PROMPTING
  db2 CONNECT TO ${MAXDB}
  db2 UNQUIESCE DATABASE
  db2 CONNECT RESET

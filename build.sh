@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-JMS_OPT="no"
-MAXIMO_VER="${MAXIMO_VER:-7.6.1.2}"
-FP_VER="${FP_VER:-2}"
-IM_VER="${IM_VER:-1.8.8}"
-WAS_VER="${WAS_VER:-20.0.0.3-kernel-java8-ibmjava}"
-DB2_VER="${DB2_VER:-11.1.4a}"
+source .env
+
+MAXIMO_VER="${ENV_MAXIMO_VER:-7.6.1.2}"
+FP_VER="${ENV_FP_VER:-2}"
+WAS_VER="${ENV_WAS_VER:-20.0.0.3-kernel-java8-ibmjava}"
 PROXY_VER="${PROXY_VER:-1.8}"
 DEFAULT_BUILD_ARGS=" --build-arg buildver=${MAXIMO_VER} "
 DEFAULT_BUILD_ARGS_FILE="build.args"
@@ -25,13 +24,14 @@ DEFAULT_BUILD_ARGS_FILE="build.args"
 DOCKER="${DOCKER_CMD:-docker}"
 
 NAME_SPACE="maximo-liberty"
-
 REMOVE=0
 SKIP_DB=0
+DEPLOY_ON_BUILD=-1
 QUIET=-q
 PRUNE=0
 ADD_LATEST_TAG=1
 REMOTE_REGISTRY=""
+INTERMEDIATE_BUILD_IMAGE_ID="ubuntu:18.04"
 
 # Usage: remove "tag name" "version" "product name"
 function remove {
@@ -87,6 +87,7 @@ while [[ $# -gt 0 ]]; do
         ;;
       -s | --skip-db )
         SKIP_DB=1
+        DEPLOY_ON_BUILD=0
         ;;
       -h | --help )
         SHOW_HELP=1
@@ -106,11 +107,15 @@ while [[ $# -gt 0 ]]; do
       -p | --prune )
         PRUNE=1
         ;;
+      --deploy-db-on-runtime )
+        DEPLOY_ON_BUILD=0
+        ;;
       "--push-registry="* )
         REMOTE_REGISTRY="${key#*=}"
         ;;
       "--namespace="* )
         NAME_SPACE="${key#*=}"
+        DEFAULT_BUILD_ARGS+=" --build-arg namespace=${NAME_SPACE} "
         ;;
     esac
     shift
@@ -129,6 +134,7 @@ Build Maximo Docker containers.
 -v  | --verbose                Show detailed output of the docker build.
 -p  | --prune                  Remove intermediate multi-stage builds automatically.
 -s  | --skip-db                Skip building and removing a DB image.
+--deploy-db-on-runtime         Deploy the Maximo database on runtime.
 --push-registry=REGISTRY_URL   Push the built images to a specified remote Docker registry.
 --namespace=NAMESPACE          Specify the namespace of the Docker images (default: maximo-liberty).
 -h  | --help                   Show this help text.
@@ -141,17 +147,20 @@ cd `dirname "${0}"`
 if [[ ${REMOVE} -eq 1 ]]; then
   echo "Remove old images..."
   remove "jmsserver" "${WAS_VER}" "IBM WebSphere Application Server Liberty JMS server"
-  if [[ ${SKIP_DB} -eq 0 ]]; then
-    remove "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition"
-  fi
   remove "maximo-ui" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo UI"
   remove "maximo-api" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo API"
   remove "maximo-cron" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo Crontask"
   remove "maximo-report" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo Report Server"
   remove "maximo-mea" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo MEA"
   remove "maximo-jmsconsumer" "${MAXIMO_VER}" "IBM WebSphere Application Server Liberty for Maximo JMS Consumer"
+  if [[ ${SKIP_DB} -eq 0 ]]; then
+    remove "db2" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition"
+  fi
   remove "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management"
   remove "maximo-base" "${MAXIMO_VER}" "IBM Maximo Asset Management base"
+  if [[ ${SKIP_DB} -eq 0 ]]; then
+    remove "db2-intermediate" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition - Intermediate Image"
+  fi
   remove "liberty" "${WAS_VER}" "IBM WebSphere Application Server Liberty base"
   remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
 #  remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
@@ -162,23 +171,49 @@ if [[ ${REMOVE} -eq 1 ]]; then
 fi
 
 # Construct a default build-args
-for entry in `cat ${DEFAULT_BUILD_ARGS_FILE}`; do
-  DEFAULT_BUILD_ARGS+="--build-arg ${entry} "
-done;
+while IFS='=' read -r key value
+do
+  if [[ "${key}" == "deploy_db_on_build" && ${DEPLOY_ON_BUILD} -eq -1 ]]; then
+    if [[ "${value}" == "yes" ]]; then
+      DEPLOY_ON_BUILD=1
+    else
+      DEPLOY_ON_BUILD=0
+    fi
+  elif [[ "${key}" != "#*" ]]; then
+    eval value=${value}
+    DEFAULT_BUILD_ARGS+="--build-arg ${key}=${value} "
+  fi
+done < <(sed --expression="/^#/d" "${DEFAULT_BUILD_ARGS_FILE}")
+
+if [[ ${DEPLOY_ON_BUILD} -eq -1 ]]; then
+  DEPLOY_ON_BUILD=1
+fi
 
 echo "Start building..."
 # Build base image container
-build "images" "${MAXIMO_VER}" "images" "Image Container"
+build "images" "${MAXIMO_VER}" "images" "Maximo Liberty Docker image Container"
+
+# Build IBM Db2 Advanced Workgroup Edition image
+if [[ ${SKIP_DB} -eq 0 ]]; then
+  build "db2-intermediate" "${MAXIMO_VER}" "db2" "IBM Db2 Advanced Workgroup Server Edition - Intermediate image"
+fi
+
+if [ ${DEPLOY_ON_BUILD} -eq 1 ]; then
+  INTERMEDIATE_BUILD_IMAGE_ID="${NAME_SPACE}/db2-intermediate:${MAXIMO_VER}"
+  DEPLOY_ON_BUILD_ARG=" --build-arg deploy_db_on_build=yes " 
+else
+  DEPLOY_ON_BUILD_ARG=" --build-arg deploy_db_on_build=no " 
+fi
 
 if [[ ${USE_CUSTOM_IMAGE} -eq 1 ]]; then
   # Build IBM Maximo Asset Management image
-  build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes --build-arg fp=${FP_VER}"
+  build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes --build-arg fp=${FP_VER} --build-arg base_maximo_build=${INTERMEDIATE_BUILD_IMAGE_ID} --build-arg deploy_db_on_build=no"
 
   # Build IBM Maximo Asset Management Custom image
-  build "maximo" "${MAXIMO_VER}" "custom" "IBM Maximo Asset Management Custom Image"
+  build "maximo" "${MAXIMO_VER}" "custom" "IBM Maximo Asset Management Custom Image" "${DEPLOY_ON_BUILD_ARG}"
 else
   # Build IBM Maximo Asset Management image
-  build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg fp=${FP_VER}"
+  build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg fp=${FP_VER} --build-arg base_maximo_build=${INTERMEDIATE_BUILD_IMAGE_ID} ${DEPLOY_ON_BUILD_ARG}"
 fi
 push "maximo" "${MAXIMO_VER}" "IBM Maximo Asset Management" 
 
@@ -223,10 +258,10 @@ push "maximo-jmsconsumer" "${MAXIMO_VER}" "IBM WebSphere Application Server Libe
 #build "frontend-proxy" "${PROXY_VER}" "frontend-proxy" "Frontend Proxy Server"
 
 # Cleanup Maximo Image build
-if [[ $PRUNE -eq 1 ]]; then
+if [[ ${PRUNE} -eq 1 ]]; then
   echo "Cleanup intermediate images."
   list=$(docker images -q -f "dangling=true" -f "label=autodelete=true")
-  if [ -n "$list" ]; then
+  if [ -n "${list}" ]; then
       docker rmi $list
   fi 
   

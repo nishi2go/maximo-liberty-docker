@@ -10,9 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ARG buildver=7.6.1.2
+ARG base_maximo_build=ubuntu:18:04
+ARG namespace=maximo-liberty
 
-FROM maximo-liberty/images:${buildver}
-FROM ubuntu:18.04
+FROM ${namespace}/images:${buildver}
+
+FROM ${base_maximo_build}
 
 LABEL maintainer="nishi2go@gmail.com"
 
@@ -22,10 +25,30 @@ ARG db_alias=MAXDB76
 ARG enable_jms=yes
 ARG install_fp=yes
 ARG skip_build=no
+ARG deploy_db_on_build=yes
+ARG backup_dir=/backup
+ARG db_alias=MAXDB76
+ARG mxintadm_password
+ARG maxadmin_password
+ARG db_maximo_password
+ARG maxreg_password
+ARG db_port=50005
+ARG base_lang=en
+ARG add_langs
+ARG admin_email_address=root@localhost
+ARG smtp_server_host_name=localhost
+ARG skin=iot18
+ARG enable_demo_data=no
+
+ENV DB2_PATH /home/ctginst1/sqllib
+ENV MAXDB ${db_alias}
+ENV MAXDB_SERVICE_PORT ${db_port}
+ENV BACKUPDIR /work/backup
 
 ENV TEMP /tmp
 WORKDIR /tmp
 
+USER root
 # Install IBM Installation Manager 1.8.8
 RUN mkdir /Install_Mgr 
 COPY --from=0 /Install_Mgr /Install_Mgr/
@@ -56,7 +79,7 @@ RUN /opt/IBM/InstallationManager/eclipse/tools/imcl \
  && rm -rf /Launchpad
 
 # Install Maximo V7.6.1 feature pack
-RUN mkdir /work
+RUN mkdir -p /work
 WORKDIR /work
 ENV MAM_FP_IMAGE MAMMTFP761${fp}IMRepo.zip
 COPY --from=0 /images/${MAM_FP_IMAGE} /work/
@@ -70,9 +93,9 @@ RUN if [ "${install_fp}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/to
 
 RUN dos2unix /opt/IBM/SMP/maximo/deployment/was-liberty-default/*.sh
 
-COPY buildwars.sh startinstall.sh /work/
+COPY *.sh /work/
 RUN chmod +x /work/*.sh
-RUN if [ "${skip_build}" = "no" ]; then /work/buildwars.sh; fi
+RUN /work/buildwars.sh
 
 RUN mkdir /opt/IBM/SMP/maximo/tools/maximo/en/liberty
 COPY liberty.dbc /opt/IBM/SMP/maximo/tools/maximo/en/liberty/
@@ -84,5 +107,13 @@ COPY maximo-config.properties.template /opt/
 
 ENV MAXIMO_DIR /maximo
 ENV MAXDB ${db_alias}
+ENV DB_VENDOR DB2
+ENV DB_TABLE_SPACE MAXDATA
+ENV DB_TEMP_SPACE MAXTEMP
+ENV DB_INDEX_SPACE MAXINDEX
+
+RUN /work/startinstallonbuild.sh
+
+RUN if [ "${deploy_db_on_build}" = "no" ]; then mkdir -p ${BACKUPDIR} && touch ${BACKUPDIR}/placeholder ; fi
 
 ENTRYPOINT ["/work/startinstall.sh"]

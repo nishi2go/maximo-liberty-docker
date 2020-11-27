@@ -13,10 +13,39 @@
 # The script is used for customizing Maximo image e.g. to install Industry Solutions, your custom java classes and etc.
 
 ARG buildver=7.6.1.2
+ARG deploy_db_on_build=yes
+ARG namespace=maximo-liberty
 
-FROM maximo-liberty/images:${buildver}
+FROM ${namespace}/images:${buildver}
 
-FROM maximo-liberty/maximo-base:${buildver}
+FROM ${namespace}/maximo-base:${buildver}
+
+ARG db_alias=MAXDB76
+ARG enable_jms=yes
+ARG install_fp=yes
+ARG skip_build=no
+ARG deploy_db_on_build=yes
+ARG backup_dir=/backup
+ARG db_alias=MAXDB76
+ARG mxintadm_password
+ARG maxadmin_password
+ARG db_maximo_password
+ARG maxreg_password
+ARG db_port=50005
+ARG base_lang=en
+ARG add_langs
+ARG admin_email_address=root@localhost
+ARG smtp_server_host_name=localhost
+ARG skin=iot18
+ARG enable_demo_data=no
+
+ENV DB2_PATH /home/ctginst1/sqllib
+ENV MAXDB ${db_alias}
+ENV MAXDB_SERVICE_PORT ${db_port}
+ENV BACKUPDIR /work/backup
+ENV DB_TABLE_SPACE MAXDATA
+ENV DB_TEMP_SPACE MAXTEMP
+ENV DB_INDEX_SPACE MAXINDEX
 
 ## Put the custom installation here or remove comments
 RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
@@ -72,4 +101,5 @@ RUN chmod +x /work/installis.sh
 #  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
 
 
+RUN /work/startinstallonbuild.sh
 RUN /work/buildwars.sh

@@ -1,65 +1,59 @@
 version: '3.6'
 services:
   maxdb:
-    image: "${ENV_NAMESPACE}/db2:${ENV_MAXIMO_VER}"
+    image: oracle/database:18.4.0-xe
     hostname: "${ENV_MAXDB_SERVICE_HOST}"
+    shm_size: 1G
     environment:
+      - "ORACLE_PWD=${ENV_DB_MAXIMO_PASSWORD}"
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+      - "ORACLE_CHARACTERSET=AL32UTF8"
     networks:
       - backend
     ports:
-      - "${ENV_MAXDB_SERVICE_PORT}:${ENV_MAXDB_SERVICE_PORT}"
-    ulimits:
-      nproc: 8192
-      nofile: 65535
-      fsize: -1
-    healthcheck:
-      test: ["CMD", "/work/db2/healthcheck.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - "${ENV_ORACLE_DB_PORT}:${ENV_ORACLE_DB_PORT}"
+      - 5500:5500
+      - 8080:8080
     volumes:
-      - type: volume
-        source: maxdb76
-        target: /home/ctginst1/ctginst1
-      # - type: bind
-      #   source: ./backup
-      #   target: /backup
-  
-  # maximo:
-  #   image: "${ENV_NAMESPACE}/maximo:${ENV_MAXIMO_VER}"
-  #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MXINTADM_PASSWORD=${ENV_MXINTADM_PASSWORD}"
-  #     - "MAXADMIN_PASSWORD=${ENV_MAXADMIN_PASSWORD}"
-  #     - "MAXREG_PASSWORD=${ENV_MAXREG_PASSWORD}"
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
-  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
-  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "BASE_LANG=${ENV_BASE_LANG}"
-  #     - "ADD_LANGS=${ENV_ADD_LANGS}"
-  #     - "ADMIN_EMAIL_ADDRESS=${ENV_ADMIN_EMAIL_ADDRESS}"
-  #     - "SMTP_SERVER_HOST_NAME=${ENV_SMTP_SERVER_HOST_NAME}"
-  #     - "SKIN=${ENV_SKIN}"
-  #     - UPDATE_APPS_ON_REBOOT=yes
-  #     - KEEP_RUNNING=yes
-  #     - "ENABLE_DEMO_DATA=${ENV_ENABLE_DEMO_DATA}"
-  #   depends_on:
-  #     - maxdb
-  #   networks:
-  #     - backend
-  #   volumes:
-  #     - maximo:/maximo
+      - type: bind 
+        source: ./oracle
+        target: /opt/oracle/scripts/setup 
+
+  maximo:
+    image: "${ENV_NAMESPACE}/maximo:${ENV_MAXIMO_VER}"
+    environment:
+      - DB_VENDOR=Oracle
+      - "MXINTADM_PASSWORD=${ENV_MXINTADM_PASSWORD}"
+      - "MAXADMIN_PASSWORD=${ENV_MAXADMIN_PASSWORD}"
+      - "MAXREG_PASSWORD=${ENV_MAXREG_PASSWORD}"
+      - "MAXDB=${ENV_ORACLE_DB_INSTANCE}"
+      - "DB_TABLE_SPACE=MAXDATA"
+      - "DB_TEMP_SPACE=MAXTEMP"
+      - "DB_INDEX_SPACE=MAXDATA"
+      - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
+      - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
+      - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
+      - UPDATE_APPS_ON_REBOOT=yes
+      - KEEP_RUNNING=yes
+      - "BASE_LANG=${ENV_BASE_LANG}"
+      - "ADD_LANGS=${ENV_ADD_LANGS}"
+      - "ADMIN_EMAIL_ADDRESS=${ENV_ADMIN_EMAIL_ADDRESS}"
+      - "SMTP_SERVER_HOST_NAME=${ENV_SMTP_SERVER_HOST_NAME}"
+      - "SKIN=${ENV_SKIN}"
+      - "ENABLE_DEMO_DATA=${ENV_ENABLE_DEMO_DATA}"
+    depends_on:
+      - maxdb
+    networks:
+      - backend
+    volumes:
+      - maximo:/maximo
 
   maximo-ui:
     image: "${ENV_NAMESPACE}/maximo-ui:${ENV_MAXIMO_VER}"
     environment:
-      - DB_VENDOR=DB2
-      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+      - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
       - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
-      - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+      - GEN_MAXIMO_PROPERTIES=no
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
@@ -84,17 +78,16 @@ services:
         aliases:
           - maximo-ui
       backend:
-    # volumes:
-    #   - maximo:/maximo
+    volumes:
+      - maximo:/maximo
 
   maximo-cron:
     image: "${ENV_NAMESPACE}/maximo-cron:${ENV_MAXIMO_VER}"
     environment:
-      - DB_VENDOR=DB2
-      - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+      - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
       - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-      - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+      - GEN_MAXIMO_PROPERTIES=no
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
       - LICENSE=accept
@@ -106,18 +99,16 @@ services:
     networks:
       frontend:
       backend:
-    # volumes:
-    #   - maximo:/maximo
-
+    volumes:
+      - maximo:/maximo
 
   # maximo-api:
   #   image: "${ENV_NAMESPACE}/maximo-api:${ENV_MAXIMO_VER}"
   #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+  #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -140,17 +131,16 @@ services:
   #       aliases:
   #         - maximo-api
   #     backend:
-  #  # volumes:
-  #  #   - maximo:/maximo
+  #   volumes:
+  #     - maximo:/maximo
 
   # maximo-report:
   #   image: "${ENV_NAMESPACE}/maximo-report:${ENV_MAXIMO_VER}"
   #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+  #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -173,17 +163,16 @@ services:
   #       aliases:
   #         - maximo-report
   #     backend:
-  #  # volumes:
-  #  #   - maximo:/maximo
+  #   volumes:
+  #     - maximo:/maximo
 
   # maximo-mea:
   #   image: "${ENV_NAMESPACE}/maximo-mea:${ENV_MAXIMO_VER}"
   #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+  #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -206,17 +195,16 @@ services:
   #       aliases:
   #        - maximo-mea
   #     backend:
-  #  # volumes:
-  #  #   - maximo:/maximo
+  #   volumes:
+  #     - maximo:/maximo
 
   # maximo-mea:
   #   image: "${ENV_NAMESPACE}/maximo-mea:${ENV_MAXIMO_VER}"
   #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+  #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -239,17 +227,16 @@ services:
   #       aliases:
   #        - maximo-mea
   #     backend:
-  #  # volumes:
-  #  #   - maximo:/maximo
+  #   volumes:
+  #     - maximo:/maximo
   
   # maximo-jmsconsumer:
   #   image: "${ENV_NAMESPACE}/maximo-jmsconsumer:${ENV_MAXIMO_VER}"
   #   environment:
-  #     - DB_VENDOR=DB2
-  #     - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
+  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - "GEN_MAXIMO_PROPERTIES=${ENV_GEN_MAXIMO_PROPERTIES}"
+  #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
   #     - LICENSE=accept
@@ -272,11 +259,11 @@ services:
   #       aliases:
   #         - maximo-jmsconsumer
   #     backend:
-  #  # volumes:
-  #  #   - maximo:/maximo
+  #   volumes:
+  #     - maximo:/maximo
 
   jmsserver:
-    image: "${ENV_NAMESPACE}/jmsserver:${ENV_WAS_VER}"
+    image: "${ENV_NAMESPACE}/jmsserver:20.0.0.3-kernel-java8-ibmjava"
     environment:
       - LICENSE=accept
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
@@ -290,7 +277,7 @@ services:
       - frontend
 
   # frontend-proxy:
-  #   image: ${ENV_NAMESPACE}/frontend-proxy:1.8
+  #   image: "${ENV_NAMESPACE}/frontend-proxy:1.8"
   #   ports:
   #     - 80:80
   #   depends_on:

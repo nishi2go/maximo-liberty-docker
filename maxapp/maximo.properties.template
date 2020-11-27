@@ -12,7 +12,7 @@
 
 mxe.db.user=maximo
 mxe.db.password=${DB_MAXIMO_PASSWORD}
-mxe.db.url=jdbc:db2://${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}
+mxe.db.url=${JDBC_URL}
 mxe.db.schemaowner=maximo
 mxe.name=${HOSTNAME}
 mxe.rmi.port=0
@@ -30,3 +30,4 @@ mxe.db.format.upper=UPPER
 mxe.db.autocommit=0
 mxe.db.systemdateformat=current timestamp
 mxe.db.format.nullvalue=COALESCE
+mxe.webclient.skin=iot18

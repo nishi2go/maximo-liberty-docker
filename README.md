@@ -29,12 +29,10 @@ Before you start, learn more about Maximo WebSphere Liberty support from the off
   IBM Maximo Asset Management V7.6.1 Feature pack 2 binary:
   * MAMMTFP7612IMRepo.zip
 
-  IBM Db2 Server V11.1 Fix Pack 4 Mod 1
-  * v11.1.4fp4a_linuxx64_server_t.tar.gz
+  IBM Db2 Server V11.1 Fix Pack 5
+  * v11.1.4fp5_linuxx64_server_t.tar.gz
 
 ## Building IBM Maximo Asset Management V7.6.1 with Liberty image by using a build tool.
-
-Prerequisites: all binaries must be accessible via a web server during a building phase.
 
 You can use a tool for building docker images by using the build tool.
 
@@ -51,6 +49,7 @@ Build Maximo Docker containers.
 -v  | --verbose                Show detailed output of the docker build.
 -p  | --prune                  Remove intermediate multi-stage builds automatically.
 -s  | --skip-db                Skip building and removing a DB image.
+--deploy-db-on-runtime         Deploy the Maximo database on runtime.
 --push-registry=REGISTRY_URL   Push the built images to a specified remote Docker registry.
 --namespace=NAMESPACE          Specify the namespace of the Docker images (default: maximo-liberty).
 -h  | --help                   Show this help text.
@@ -73,26 +72,24 @@ Procedures:
     DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz
     IED_V1.8.8_Wins_Linux_86.zip
     MAMMTFP7612IMRepo.zip
-    v11.1.4fp4a_linuxx64_server_t.tar.gz
+    v11.1.4fp5_linuxx64_server_t.tar.gz
     ```
 3. Run the build tool
    ```bash
-   bash build.sh [-r] [-v] [-c]
+   bash build.sh [-r] [-v] [-c] [-rt] [-p]
    ```
 
    Example:
    ```bash
-   bash build.sh -r
+   bash build.sh -r -v -rt -p
    ```
    Note: This script works on Windows Subsystem on Linux.
-4. Edit docker-compose.yml to enable optional servers e.g. maximo-api, maximo-report and etc.
+4. Edit ```docker-compose.yml``` to enable optional services e.g. maximo-api, maximo-report and etc.
 5. Run containers by using the Docker Compose file to create and deploy instances:
     ```bash
     docker-compose up -d
     ```
-    Note: It will take 3-4 hours (depend on your machine) to complete the installation.
-
-    You can scale servers with docker-compose --scale option.
+    To scale servers with the ```docker-compose --scale``` option:
     ```bash
     docker-compose up -d --scale maximo-ui=2
     ```
@@ -124,27 +121,43 @@ To install industry solutions e.g. Oil & Gas, Service Providers and the other of
 2. Put the installation image, e.g. ```Max_Oil_and_Gas_761.zip``` and ```OG7610_ifixes.20200316-0706.zip```, to the ``` images``` directory.
 3. Run the build command with ``-c`` or ```--use-custom-image```.
     ```bash
-    build.sh -c
+    build.sh -c -p -rt
     ``` 
 
 ## Customize your environment.
 
-In order to install a second language, deploy demo data or change default passwords, edit the ``` build.args ``` file before building the container images. The following parameters are available by default.
+In order to install a second language, deploy demo data or change default passwords, edit the ``` build.args ``` and ``` .env ``` file before building the container images. The following parameters are available by default.
 
+```build.args```
 ```properties
+# Deploy DB schema on build.
 deploy_db_on_build=yes
-mxintadm_password=changeit
-maxadmin_password=changeit
-maxreg_password=changeit
-db_port=50005
-db_maximo_password=changeit
-base_lang=en
-add_langs=de,fr
-admin_email_address=root@localhost
-smtp_server_host_name=localhost
-skin=iot18
-enable_demo_data=no
+# Enable and build the JMS services.
 enable_jms=yes
+# Update Installation Manager to the latest level.
+update_im=no
+```
+
+```.env```
+```properties
+# Default passwords
+ENV_DB_MAXIMO_PASSWORD=changeit
+ENV_MXINTADM_PASSWORD=changeit
+ENV_MAXADMIN_PASSWORD=changeit
+ENV_MAXREG_PASSWORD=changeit
+# Liberty admin user
+ENV_ADMIN_USER_NAME=admin 
+ENV_ADMIN_PASSWORD=changeit
+# Language installation
+ENV_BASE_LANG=en
+ENV_ADD_LANGS=de,fr,ja
+# Default e-mail configurations
+ENV_ADMIN_EMAIL_ADDRESS=root@localhost
+ENV_SMTP_SERVER_HOST_NAME=localhost
+# Skin
+ENV_SKIN=iot18
+# Install the demo data
+ENV_ENABLE_DEMO_DATA=no
 ```
 
 ## Database deployment on build vs. on runtime.
@@ -153,10 +166,15 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 
 #### Procedures to switch deploy database schemas on runtime.
 
-1. Uncomment the maximo section in ```docker-compose.yml```.
-2. Change ```deploy_db_on_build``` to no in ```build.args```.
-3. Run the build command.
-4. Change the values of ``` GEN_MAXIMO_PROPERTIES ``` to ``` no ``` in ``` docker-compose.yml ``` 
+1. Uncomment the all ```volumes``` sections in ```docker-compose.yml```.
+2. Uncomment the maximo section in ```docker-compose.yml```.
+3. Run the build command with ```--deploy-db-on-runtime``` or change ```deploy_db_on_build``` to ```no``` in ```build.args``` then run the build.sh command.
+
+   Example:
+   ```bash
+   bash build.sh -r -v -rt -p --deploy-db-on-runtime
+   ```
+4. Change the values of ```ENV_GEN_MAXIMO_PROPERTIES``` to ```no``` in ```.env``` 
 
 ## Skip the database deployment during the maxdb container building time by using a Db2 backup image.
 
@@ -175,6 +193,69 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 3. Place your backup image to the above directory.
 4. Build container images by using the build tool.
 
+## Building IBM Maximo Asset Management V7.6 images with an Oracle Database Container by using build tool
+
+Oracle database containers are officially provided by Oracle from the [repository](https://github.com/oracle/docker-images/tree/master/OracleDatabase). You can run the Maximo on Docker on top of Oracle Container. Currently, the supported installation process is [database deployment on runtime](https://github.com/oracle/docker-images/tree/master/OracleDatabase) only.
+
+### Prerequisites:
+- An Oracle Database containar or any on-premise instance must be prepared before running ```docker-compose``` command.
+
+1. Follow the guide from the [repo](https://github.com/oracle/docker-images/tree/master/OracleDatabase) to create an Oracle Database container.
+2. Clone this repository
+    ```bash
+    git clone https://github.com/nishi2go/maximo-liberty-docker.git
+    ```
+3. Place the downloaded Maximo, IBM Db2, IBM Installation Manager and IBM WebSphere Liberty License binaries into the maximo-liberty-docker/images directory.
+    ```bash
+    > cd maximo-liberty-docker
+    > ls -l images
+    check.sh
+    Dockerfile
+    MAM_7.6.1_LINUX64.tar.gz
+    packages.list
+    wlp-nd-license.jar
+    DB2_AWSE_REST_Svr_11.1_Lnx_86-64.tar.gz
+    IED_V1.8.8_Wins_Linux_86.zip
+    MAMMTFP7612IMRepo.zip
+    v11.1.4fp5_linuxx64_server_t.tar.gz
+    ```
+4. Run the build tool
+   Example:
+   ```bash
+   bash build.sh -r -v -c -rt --skip-db
+   ```
+   Note: This script works on Windows Subsystem on Linux.
+5. Uncomment the all ```volumes``` sections in ```docker-compose.ora.yml```.
+6. Edit ```docker-compose.ora.yml``` to enable optional servers e.g. maximo-api, maximo-report and etc.
+7. Run the Oracle container by using the Docker Compose file to create and deploy the database instance first:
+    ```bash
+    docker-compose -f docker-compose.ora.yml -d maxdb
+    ```
+
+    Wait until the text "```DATABASE IS READY TO USE!```" is shown in the logs. 
+    ```bash
+    docker-compose -f docker-compose.ora.yml logs -f maxdb
+    ```
+8. Run the Maximo container to deploy the database schema to Oracle database. 
+    ```bash
+    docker-compose -f docker-compose.ora.yml -d maximo
+    ```
+
+    Wait until the text "```CTGIN5012I: The reconfiguration action updateApplicationDBLite completed successfully.```" is shown in the logs. 
+    ```bash
+    docker-compose -f docker-compose.ora.yml logs -f maximo
+    ```
+   Note: It will take 3-4 hours (depend on your machine) to complete the installation.
+9. Run the all other containers:
+    ```bash
+    docker-compose -f docker-compose.ora.yml up -d
+    ```
+    To scale servers with the ```docker-compose --scale``` option.
+    ```bash
+    docker-compose -f docker-compose.ora.yml up -d --scale maximo-ui=2
+    ``` 
+10. Make sure to be accessible to Maximo login page: http://hostname/maximo
+
 ## Restore the database during starting up the maxdb container by using a Db2 backup image.
 
 When you want to restore your database backup image on runtime, run the following procedures.
@@ -190,7 +271,7 @@ When you want to restore your database backup image on runtime, run the followin
     ```bash
     mkdir ./backup
     ```
-4. Uncomment the following volume configuration in docker-compose.yml.
+4. Uncomment the following volume configuration in ```docker-compose.yml.```
     ```yaml
       maxdb:
         volumes:
@@ -202,7 +283,7 @@ When you want to restore your database backup image on runtime, run the followin
 
 #### Take a backup database from a running container.
 
-You can take a backup from the maxdb container by using a backup tool.
+You can take a backup from the ```maxdb``` container by using a backup tool.
 ```bash
 docker-compose exec maxdb /work/db2/backup.sh maxdb76 /backup
 ```
@@ -212,4 +293,3 @@ Note: There must be one file in the directory. The restore task will fail when m
 ## To do
 1. Helm support
 2. Industry Solution templates
-3. Oracle Database support

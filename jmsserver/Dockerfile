@@ -10,7 +10,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ARG libertyver=20.0.0.3-kernel-java8-ibmjava
-FROM maximo-liberty/liberty:${libertyver}
+ARG namespace=maximo-liberty
+
+FROM ${namespace}/liberty:${libertyver}
 LABEL maintainer="nishi2go@gmail.com"
 
 ENV JMS_SERVER_PORT 9011

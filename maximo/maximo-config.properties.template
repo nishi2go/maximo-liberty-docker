@@ -29,16 +29,24 @@ mxe.useAppServerSecurity=0
 mxe.rmi.enabled=0
 
 # Database Configuration Parameters
-Database.UserSpecifiedJDBCURL=jdbc:db2://${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}
+Database.UserSpecifiedJDBCURL=${JDBC_URL}
 Database.AutomateConfig=false
-Database.Vendor=DB2
+Database.Vendor=${DB_VENDOR}
 Database.DB2.DatabaseName=${MAXDB}
-Database.DB2.ServerHostName=${MAXDB_SERVICE_HOST}
+Database.DB2.ServerHostName=${MAXDB_SERVICE_HOST_IP}
 Database.DB2.ServerPort=${MAXDB_SERVICE_PORT}
-Database.DB2.DataTablespaceName=MAXDATA
-Database.DB2.TempTablespaceName=MAXTEMP
+Database.DB2.DataTablespaceName=${DB_TABLE_SPACE}
+Database.DB2.TempTablespaceName=${DB_TEMP_SPACE}
+Database.DB2.IndexTablespaceName=${DB_INDEX_SPACE}
 Database.DB2.Vargraphic=true
 Database.DB2.TextSearchEnabled=false
+
+Database.Oracle.ServerHostName=${MAXDB_SERVICE_HOST_IP}
+Database.Oracle.ServerPort=${MAXDB_SERVICE_PORT}
+Database.Oracle.InstanceName=${MAXDB}
+Database.Oracle.DataTablespaceName=${DB_TABLE_SPACE}
+Database.Oracle.TempTablespaceName=${DB_TEMP_SPACE}
+Database.Oracle.IndexTablespaceName=${DB_INDEX_SPACE}
 
 # WebSphere Configuration Parameters
 ApplicationServer.Vendor=WebSphere

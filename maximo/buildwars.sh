@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if [ "${skip_build}" = "yes" ]
+then
+  echo "Skip to build war files."
+  exit
+fi
+
 function jvm_config {
   cp "$1.orig" "$1.tmp"
 

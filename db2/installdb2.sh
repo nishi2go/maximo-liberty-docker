@@ -97,11 +97,12 @@ then
 
     db2 connect reset
     db2stop force
+
+    db2set -null DB2COMM
 fi
 
-
-echo "Start initial database configurations."
 if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
+  echo "Start initial database configurations."
   /bin/bash -c "db2set -null DB2COMM"
   db2start
   until db2gcf -s -t 1 >/dev/null 2>&1; do

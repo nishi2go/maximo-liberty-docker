@@ -23,7 +23,8 @@ then
 fi
 
 # Watch and wait the database
-wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is up"
+wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is ready."
+export MAXDB_SERVICE_HOST_IP=`ping ${MAXDB_SERVICE_HOST} -c 1 | head -n 2 | tail -n 1 | cut -f 4 -d ' ' | tr -d ':'`
 
 if [[ ! -z "${ENABLE_DEMO_DATA}" && "${ENABLE_DEMO_DATA}" = "yes" ]]
 then
@@ -33,6 +34,16 @@ fi
 #copy skel files
 CONFIG_FILE=/opt/maximo-config.properties
 CONFIG_FILE_TEMPLATE=${CONFIG_FILE}.template
+
+if [ "${DB_VENDOR}" == "Oracle" ]
+then
+  export JDBC_URL="jdbc:oracle:thin:@${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}"
+fi
+if [ "${DB_VENDOR}" == "DB2" ]
+then
+  export JDBC_URL="jdbc:db2://${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}"
+fi
+
 if [ -f ${CONFIG_FILE} ]
 then
   echo "Maximo has already configured."
@@ -57,7 +68,7 @@ $SMP/ConfigTool/scripts/reconfigurePae.sh -action updateApplicationDBLite \
 MAXIMO_PROPERTIES=${SMP}/maximo/applications/maximo/properties/maximo.properties
 cp ${MAXIMO_PROPERTIES} ${MAXIMO_DIR} && chmod 444 ${MAXIMO_DIR}/maximo.properties
 
-if [ "${KEEP_RUNNING}" = "yes" ]
+if [ "${KEEP_RUNNING}" == "yes" ]
 then
   sleep inf &
   child=$!

@@ -20,30 +20,40 @@ terminate_handler()
 
 trap die SIGTERM
 
-if [ "${JVM_HEAP_MIN_SIZE}" != "" ]
+if [[ "${JVM_HEAP_MIN_SIZE}" != "" ]]
 then
   echo "-Xms${JVM_HEAP_MIN_SIZE}" >> /config/jvm.options
 fi
 
-if [ "${JVM_HEAP_MAX_SIZE}" != "" ]
+if [[ "${JVM_HEAP_MAX_SIZE}" != "" ]]
 then
   echo "-Xmx${JVM_HEAP_MAX_SIZE}" >> /config/jvm.options
 fi
 
-if [ "${GEN_MAXIMO_PROPERTIES}" != "yes" ]
+if [[ "${GEN_MAXIMO_PROPERTIES}" != "yes" ]]
 then
-  until [ -f "${MAXIMO_DIR}/maximo.properties" ]
+  until [[ -f "${MAXIMO_DIR}/maximo.properties" ]]
   do
     sleep 1
   done
 
   cp "${MAXIMO_DIR}/maximo.properties" /config/
 else
-  wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is up"
+  wait-for-it.sh ${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT} -t 0 -q -- echo "Database is ready."
+
+  if [[ -z "${JDBC_URL}" && "${DB_VENDOR}" == "Oracle" ]]
+  then
+      export JDBC_URL="jdbc:oracle:thin:@${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}"
+  fi
+  if [[ -z "${JDBC_URL}" && "${DB_VENDOR}" == "DB2" ]]
+  then
+      export JDBC_URL="jdbc:db2://${MAXDB_SERVICE_HOST}:${MAXDB_SERVICE_PORT}/${MAXDB}"
+  fi
+
   cat "${MAXIMO_DIR}/maximo.properties.template" | envsubst > /config/maximo.properties
 fi
 
-if [ -z "${LIBERTY_CMD}" ]
+if [[ -z "${LIBERTY_CMD}" ]]
 then
   LIBERTY_CMD=run
 fi
