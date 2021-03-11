@@ -179,11 +179,13 @@ do
     else
       DEPLOY_ON_BUILD=0
     fi
-  elif [[ "${key}" != "#*" ]]; then
+  elif [[ "${key}" != "#*" && ! -z "${value}" ]]; then
     eval value=${value}
-    DEFAULT_BUILD_ARGS+="--build-arg ${key}=${value} "
+    if [[ ! -z "${value}" ]]; then
+      DEFAULT_BUILD_ARGS+="--build-arg ${key}=${value} "
+    fi
   fi
-done < <(sed --expression="/^#/d" "${DEFAULT_BUILD_ARGS_FILE}")
+done < <(sed --expression='/^#/d' --expression='/^$/d' "${DEFAULT_BUILD_ARGS_FILE}")
 
 if [[ ${DEPLOY_ON_BUILD} -eq -1 ]]; then
   DEPLOY_ON_BUILD=1
