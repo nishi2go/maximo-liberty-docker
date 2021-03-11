@@ -68,6 +68,17 @@ RUN chmod +x /work/installis.sh
 # RUN unzip -o OG7610_ifixes.20200316-0706.zip -d /opt/IBM/SMP/maximo/ && rm -rf ${WDIR}*
 # WORKDIR /work
 
+## Sample scripts for Maximo for Transportation Industry Solution
+# ENV IMAGE_NAME Max_Transportation_762IFR3.zip
+# ENV FP_IMAGE_NAME 7.6.2.6-TIV-TRN-FP0006.zip
+# ENV IS_ID com.ibm.tivoli.tpae.IS.Transportation
+# ENV REPO_FILE TransportationInstallerRepository.zip
+# ENV WDIR /work/trn
+# RUN mkdir ${WDIR}
+# COPY --from=0 /images/${IMAGE_NAME} ${WDIR}/
+# COPY --from=0 /images/${FP_IMAGE_NAME} ${WDIR}/
+# RUN /work/installis.sh --image=${IMAGE_NAME} --image-fp=${FP_IMAGE_NAME} \
+#     --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
 ## Sample scripts for Maximo Scheduler Add on
 # ENV IMAGE_NAME MAM_Scheduler_7.6.7.zip
 # ENV IS_ID com.ibm.tivoli.tpae.IS.Scheduler
