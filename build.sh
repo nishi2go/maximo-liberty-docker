@@ -31,6 +31,7 @@ QUIET=-q
 PRUNE=0
 ADD_LATEST_TAG=1
 REMOTE_REGISTRY=""
+PRESERVE_IMAGE_CONTAINER=0
 INTERMEDIATE_BUILD_IMAGE_ID="ubuntu:18.04"
 
 # Usage: remove "tag name" "version" "product name"
@@ -51,7 +52,7 @@ function remove {
 
 # Usage: build "tag name" "version" "target directory name" "product name"
 function build {
-  echo "Start to build ${4} image"
+  echo "Building ${4} image ..."
   if [[ ${ADD_LATEST_TAG} -eq 1 ]]; then
     LT="-t ${NAME_SPACE}/${1}:latest"
   fi
@@ -110,6 +111,9 @@ while [[ $# -gt 0 ]]; do
       --deploy-db-on-runtime )
         DEPLOY_ON_BUILD=0
         ;;
+      -i | --preserve-image-container )
+        PRESERVE_IMAGE_CONTAINER=1
+        ;;
       "--push-registry="* )
         REMOTE_REGISTRY="${key#*=}"
         ;;
@@ -127,22 +131,24 @@ Usage: build.sh [OPTIONS]
 
 Build Maximo Docker containers.
 
--r  | --remove                 Remove images when an image exists in repository.
--R  | --remove-only            Remove images without building when an image exists in repository.
--rt | --remove-latest-tag      Do not add the "letest" tag to the built images.
--c  | --use-custom-image       Build a custom image for Maximo installation container.
--v  | --verbose                Show detailed output of the docker build.
--p  | --prune                  Remove intermediate multi-stage builds automatically.
--s  | --skip-db                Skip building and removing a DB image.
---deploy-db-on-runtime         Deploy the Maximo database on runtime.
---push-registry=REGISTRY_URL   Push the built images to a specified remote Docker registry.
---namespace=NAMESPACE          Specify the namespace of the Docker images (default: maximo-liberty).
--h  | --help                   Show this help text.
+-r  | --remove                    Remove images when an image exists in repository.
+-R  | --remove-only               Remove images without building when an image exists in repository.
+-rt | --remove-latest-tag         Do not add the "letest" tag to the built images.
+-c  | --use-custom-image          Build a custom image for Maximo installation container.
+-v  | --verbose                   Show detailed output of the docker build.
+-p  | --prune                     Remove intermediate multi-stage builds automatically.
+-s  | --skip-db                   Skip building and removing a DB image.
+-i  | --preserve-image-container  Do not remove and recreate an installation image container.
+--deploy-db-on-runtime            Deploy the Maximo database on runtime.
+--push-registry=REGISTRY_URL      Push the built images to a specified remote Docker registry.
+--namespace=NAMESPACE             Specify the namespace of the Docker images (default: maximo-liberty).
+-h  | --help                      Show this help text.
 EOF
   exit 1
 fi
 
 cd `dirname "${0}"`
+
 
 if [[ ${REMOVE} -eq 1 ]]; then
   echo "Remove old images..."
@@ -162,7 +168,9 @@ if [[ ${REMOVE} -eq 1 ]]; then
     remove "db2-intermediate" "${MAXIMO_VER}" "IBM Db2 Advanced Workgroup Server Edition - Intermediate Image"
   fi
   remove "liberty" "${WAS_VER}" "IBM WebSphere Application Server Liberty base"
-  remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+  if [[ ${PRESERVE_IMAGE_CONTAINER} -eq 0 ]]; then
+    remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+  fi
 #  remove "frontend-proxy" "${PROXY_VER}" "Frontend Proxy Server"
 
   if [[ ${REMOVE_ONLY} -eq 1 ]]; then
@@ -193,7 +201,10 @@ fi
 
 echo "Start building..."
 # Build base image container
-build "images" "${MAXIMO_VER}" "images" "Maximo Liberty Docker image Container"
+image_container_id=`${DOCKER} images -q --no-trunc ${NAME_SPACE}/images:${MAXIMO_VER}`
+if [[ ${PRESERVE_IMAGE_CONTAINER} -eq 0 || -z "${image_container_id}" ]]; then
+  build "images" "${MAXIMO_VER}" "images" "Maximo Liberty Docker image Container"
+fi
 
 # Build IBM Db2 Advanced Workgroup Edition image
 if [[ ${SKIP_DB} -eq 0 ]]; then
@@ -212,7 +223,7 @@ if [[ ${USE_CUSTOM_IMAGE} -eq 1 ]]; then
   build "maximo-base" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg skip_build=yes --build-arg fp=${FP_VER} --build-arg base_maximo_build=${INTERMEDIATE_BUILD_IMAGE_ID} --build-arg deploy_db_on_build=no"
 
   # Build IBM Maximo Asset Management Custom image
-  build "maximo" "${MAXIMO_VER}" "custom" "IBM Maximo Asset Management Custom Image" "${DEPLOY_ON_BUILD_ARG}"
+  build "maximo" "${MAXIMO_VER}" "custom" "IBM Maximo Asset Management Custom" "${DEPLOY_ON_BUILD_ARG}"
 else
   # Build IBM Maximo Asset Management image
   build "maximo" "${MAXIMO_VER}" "maximo" "IBM Maximo Asset Management" "--build-arg fp=${FP_VER} --build-arg base_maximo_build=${INTERMEDIATE_BUILD_IMAGE_ID} ${DEPLOY_ON_BUILD_ARG}"
@@ -264,10 +275,12 @@ if [[ ${PRUNE} -eq 1 ]]; then
   echo "Cleanup intermediate images."
   list=$(docker images -q -f "dangling=true" -f "label=autodelete=true")
   if [ -n "${list}" ]; then
-      docker rmi $list
+      docker image rm $list
   fi 
   
-  remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+  if [[ ${PRESERVE_IMAGE_CONTAINER} -eq 0 ]]; then
+    remove "images" "${MAXIMO_VER}" "Maximo Liberty Docker image container"
+  fi
 fi
 
 echo "Done"
