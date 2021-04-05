@@ -132,7 +132,7 @@ To install industry solutions e.g. Oil & Gas, Service Providers and the other of
    RUN unzip -o OG7610_ifixes.20200316-0706.zip -d /opt/IBM/SMP/maximo/ && rm -rf /work/oag/*
    ```
 2. Put the installation image, e.g. `Max_Oil_and_Gas_761.zip` and `OG7610_ifixes.20200316-0706.zip`, to the ` images` directory.
-3. Run the build command with `-c` or `--use-custom-image`.
+3. Run the build command with `-c` or `--use-custom-image` option.
    ```bash
    build.sh -c -p -rt
    ```
@@ -193,7 +193,7 @@ The database deployment a.k.a maxinst and updatedb will be executed on the docke
 
 4. Change the values of `ENV_GEN_MAXIMO_PROPERTIES` to `no` in `.env`
 
-## Skip the database deployment during the maxdb container building time by using a Db2 backup image.
+## Skip running the maxinst program using a Db2 backup image at the Docker build.
 
 [Maxinst program](http://www-01.ibm.com/support/docview.wss?uid=swg21314938) supports to initialize and create a Maximo database that is called during the "deployConfiguration" process in the Maximo installer. This process is painfully slow because it creates more than a thousand tables from scratch. To skip the process, you can use a backup database image to restore during the build time in a maxdb container image.
 
