@@ -49,17 +49,18 @@ Usage: build.sh [OPTIONS]
 
 Build Maximo Docker containers.
 
--r  | --remove                 Remove images when an image exists in repository.
--R  | --remove-only            Remove images without building when an image exists in repository.
--rt | --remove-latest-tag      Do not add the "letest" tag to the built images.
--c  | --use-custom-image       Build a custom image for Maximo installation container.
--v  | --verbose                Show detailed output of the docker build.
--p  | --prune                  Remove intermediate multi-stage builds automatically.
--s  | --skip-db                Skip building and removing a DB image.
---deploy-db-on-runtime         Deploy the Maximo database on runtime.
---push-registry=REGISTRY_URL   Push the built images to a specified remote Docker registry.
---namespace=NAMESPACE          Specify the namespace of the Docker images (default: maximo-liberty).
--h  | --help                   Show this help text.
+-r  | --remove                    Remove images when an image exists in repository.
+-R  | --remove-only               Remove images without building when an image exists in repository.
+-rt | --remove-latest-tag         Do not add the "letest" tag to the built images.
+-c  | --use-custom-image          Build a custom image for Maximo installation container.
+-v  | --verbose                   Show detailed output of the docker build.
+-p  | --prune                     Remove intermediate multi-stage builds automatically.
+-s  | --skip-db                   Skip building and removing a DB image.
+-i  | --preserve-image-container  Do not remove and recreate an installation image container.
+--deploy-db-on-runtime            Deploy the Maximo database on runtime.
+--push-registry=REGISTRY_URL      Push the built images to a specified remote Docker registry.
+--namespace=NAMESPACE             Specify the namespace of the Docker images (default: maximo-liberty).
+-h  | --help                      Show this help text.
 ```
 
 Procedures:
@@ -85,7 +86,7 @@ Procedures:
 3. Run the build tool
 
    ```bash
-   bash build.sh [-r] [-v] [-c] [-rt] [-p]
+   bash build.sh [-r] [-v] [-c] [-rt] [-p] [-i]
    ```
 
    Example:
