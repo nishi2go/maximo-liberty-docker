@@ -1,0 +1,92 @@
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Enterprise Service Servlet</web-resource-name>
+        <description>Enterprise Service Servlet (HTTP POST) accessible by authorized users</description>
+        <url-pattern>/es/*</url-pattern>
+        <url-pattern>/esqueue/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to Enterprise Service Servlet (HTTP POST)</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>App Service Servlet</web-resource-name>
+        <description>App Service Servlet (HTTP POST) accessible by authorized users</description>
+        <url-pattern>/ss/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to App Service Servlet (HTTP POST)</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Workflow Service Servlet</web-resource-name>
+        <description>Workflow Service Servlet (HTTP POST) accessible by authorized users</description>
+        <url-pattern>/wf/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to Workflow Service Servlet (HTTP POST)</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Object Structure Service Servlet</web-resource-name>
+        <description>Object Structure Service Servlet (HTTP POST) accessible by authorized users</description>
+        <url-pattern>/os/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to Object Structure Service Servlet (HTTP POST)</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Integration Web Services</web-resource-name>
+        <description>Integration Web Services accessible by authorized users</description>
+        <url-pattern>/services/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to Integration Web Services</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<env-entry>
+    <description>Web Session Factory Class</description>
+    <env-entry-name>webAppSessionFactoryClassName</env-entry-name>
+    <env-entry-type>java.lang.String</env-entry-type>
+    <env-entry-value>psdi.webclient.system.websession.AppServerWebAppSessionFactory</env-entry-value>
+</env-entry>

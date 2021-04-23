@@ -25,7 +25,6 @@ mail.smtp.host=${SMTP_SERVER_HOST_NAME}
 mxe.db.user=maximo
 mxe.db.password=${DB_MAXIMO_PASSWORD}
 mxe.db.schemaowner=maximo
-mxe.useAppServerSecurity=0
 mxe.rmi.enabled=0
 
 # Database Configuration Parameters

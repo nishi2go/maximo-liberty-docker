@@ -24,16 +24,16 @@ ARG db_port=50005
 ENV DB2_PATH /home/ctginst1/sqllib
 ENV MAXDB ${db_alias}
 ENV MAXDB_SERVICE_PORT ${db_port}
-ENV BACKUPDIR ${backup_dir}
-ENV SRC_BACKUPDIR /work/backup
-ENV DATADIR /home/ctginst1/ctginst1
-ENV INITDATADIR /home/ctginst1/init-data
+ENV BACKUP_DIR ${backup_dir}
+ENV SRC_BACKUP_DIR /work/backup
+ENV DATA_DIR /home/ctginst1/ctginst1
+ENV INIT_DATA_DIR /home/ctginst1/init-data
 
 USER root
 COPY --chown=ctginst1:ctggrp1 *.sh /work/db2/
 RUN chmod -R 700 /work/db2 && chmod +x /work/db2/*.sh
-RUN mkdir -p ${BACKUPDIR} && chown ctginst1.ctggrp1 ${BACKUPDIR} && chmod 774 ${BACKUPDIR}
-COPY --from=0 --chown=ctginst1:ctggrp1 ${SRC_BACKUPDIR}/* ${BACKUPDIR}/
+RUN mkdir -p ${BACKUP_DIR} && chown ctginst1.ctggrp1 ${BACKUP_DIR} && chmod 774 ${BACKUP_DIR}
+COPY --from=0 --chown=ctginst1:ctggrp1 ${SRC_BACKUP_DIR}/* ${BACKUP_DIR}/
 
 USER ctginst1
 RUN /work/db2/restoreimage.sh \

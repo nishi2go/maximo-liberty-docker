@@ -42,7 +42,7 @@ ARG enable_demo_data=no
 ENV DB2_PATH /home/ctginst1/sqllib
 ENV MAXDB ${db_alias}
 ENV MAXDB_SERVICE_PORT ${db_port}
-ENV BACKUPDIR /work/backup
+ENV BACKUP_DIR /work/backup
 ENV DB_TABLE_SPACE MAXDATA
 ENV DB_TEMP_SPACE MAXTEMP
 ENV DB_INDEX_SPACE MAXINDEX
@@ -112,5 +112,5 @@ RUN chmod +x /work/installis.sh
 #  --workdir=${WDIR} --is-id=${IS_ID} --repo-file=${REPO_FILE} --accept-license
 
 
-RUN /work/startinstallonbuild.sh
+RUN if [ "${deploy_db_on_build}" = "yes" ]; then /work/startinstall.sh ; fi
 RUN /work/buildwars.sh

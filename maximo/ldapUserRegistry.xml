@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<server>
+  <ldapRegistry
+      id="ldap"
+      realm="defaultWIMFileBasedRealm"
+      host="${env.LDAP_HOST_NAME}"
+      port="${env.LDAP_PORT}"
+      ignoreCase="true"
+      baseDN="${env.LDAP_BASE_DN}"
+      bindDN="${env.LDAP_BIND_DN}"
+      bindPassword="${env.LDAP_ADMIN_PASSWORD}"
+      ldapType="Custom"
+      sslEnabled="false">
+    <customFilters
+        userFilter="(uid=%v)"
+        groupFilter="(cn=%v)"
+        userIdMap="*:uid"
+        groupIdMap="*:cn"
+        groupMemberIdMap="groupOfNames:member"></customFilters>
+  </ldapRegistry>
+
+  <federatedRepository>
+    <primaryRealm
+        name="RealmName"
+        delimiter="@"
+        allowOpIfRepoDown="true">
+      <participatingBaseEntry name="${env.LDAP_BASE_DN}" />
+      <uniqueUserIdMapping
+          inputProperty="uniqueName"
+          outputProperty="uniqueName" />
+      <userSecurityNameMapping
+          inputProperty="principalName"
+          outputProperty="principalName" />
+      <userDisplayNameMapping
+          inputProperty="principalName"
+          outputProperty="principalName" />
+      <uniqueGroupIdMapping
+          inputProperty="uniqueName"
+          outputProperty="uniqueName" />
+      <groupSecurityNameMapping
+          inputProperty="cn"
+          outputProperty="cn" />
+      <groupDisplayNameMapping
+          inputProperty="cn"
+          outputProperty="cn" />
+    </primaryRealm>
+  </federatedRepository>
+</server>

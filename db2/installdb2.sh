@@ -101,7 +101,7 @@ then
     db2set -null DB2COMM
 fi
 
-if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
+if ls ${BACKUP_DIR}/${MAXDB}.* > /dev/null 2>&1; then
   echo "Start initial database configurations."
   /bin/bash -c "db2set -null DB2COMM"
   db2start
@@ -109,8 +109,8 @@ if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
     sleep 1
   done
 
-  echo "Restore database ${MAXDB} from ${BACKUPDIR} ..."
-  /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} without prompting && db2 rollforward database ${MAXDB} to end of logs and stop && db2 terminate"
+  echo "Restore database ${MAXDB} from ${BACKUP_DIR} ..."
+  /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUP_DIR} without prompting && db2 rollforward database ${MAXDB} to end of logs and stop && db2 terminate"
   db2stop
-  rm ${BACKUPDIR}/*
+  rm ${BACKUP_DIR}/*
 fi

@@ -24,15 +24,15 @@ ARG db_port=50005
 ENV DB2_PATH /home/ctginst1/sqllib
 ENV MAXDB ${db_alias}
 ENV MAXDB_SERVICE_PORT ${db_port}
-ENV BACKUPDIR ${backup_dir}
-ENV DATADIR /home/ctginst1/ctginst1
-ENV INITDATADIR /home/ctginst1/init-data
+ENV BACKUP_DIR ${backup_dir}
+ENV DATA_DIR /home/ctginst1/ctginst1
+ENV INIT_DATA_DIR /home/ctginst1/init-data
 
 ## Install required software
 RUN dpkg --add-architecture i386
 RUN apt-get update -y && apt-get install -y sudo netcat file libxml2 \
-    libx32stdc++6 libpam0g:i386 binutils libaio1 libnuma1 \
-    && rm -rf /var/lib/apt/lists/*
+  libx32stdc++6 libpam0g:i386 binutils libaio1 libnuma1 \
+  && rm -rf /var/lib/apt/lists/*
 
 # Install IBM DB2
 RUN groupadd ctggrp1
@@ -41,8 +41,8 @@ RUN useradd -g ctggrp1 -m -d /home/ctginst1 ctginst1
 RUN useradd -g maximo -m -d /home/maximo maximo
 RUN echo "ctginst1    ALL=(root) NOPASSWD: /usr/sbin/chpasswd, $DB2_PATH/instance/db2rfe " >> /etc/sudoers.d/ctginst1
 
-RUN mkdir -p ${BACKUPDIR} && chown ctginst1.ctggrp1 ${BACKUPDIR} && chmod 774 ${BACKUPDIR}
-COPY --from=0 --chown=ctginst1:ctggrp1 /backup/* ${BACKUPDIR}/
+RUN mkdir -p ${BACKUP_DIR} && chown ctginst1.ctggrp1 ${BACKUP_DIR} && chmod 774 ${BACKUP_DIR}
+COPY --from=0 --chown=ctginst1:ctggrp1 /backup/* ${BACKUP_DIR}/
 
 RUN mkdir -p /work/db2 && chown ctginst1.ctggrp1 /work/db2
 COPY --chown=ctginst1:ctggrp1 *.sh /work/db2/

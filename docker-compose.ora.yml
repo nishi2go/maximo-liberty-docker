@@ -57,16 +57,22 @@ services:
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
-      - LICENSE=accept
+      - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+      - "LDAP_PORT=${ENV_LDAP_PORT}"
+      - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+      - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+      - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
+      - "LICENSE=accept"
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
-      - WLP_LOGGING_CONSOLE_LOGLEVEL=info
-      - MXE_CRONTASK_DONOTRUN=ALL
+      - "WLP_LOGGING_CONSOLE_LOGLEVEL=info"
+      - "WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc,audit"
+      - "MXE_CRONTASK_DONOTRUN=ALL"
+      - "WLP_DEBUG_SUSPEND=n"
     ports:
       - "9080:9080"
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=maximo-docker-liberty_frontend"
       - "traefik.http.routers.maximo-ui.entrypoints=web"
       - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
       - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo`) || PathPrefix(`/maximo-x`)"
@@ -90,9 +96,15 @@ services:
       - GEN_MAXIMO_PROPERTIES=no
       - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
       - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+      - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+      - "LDAP_PORT=${ENV_LDAP_PORT}"
+      - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+      - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+      - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
       - LICENSE=accept
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
+      - "WLP_DEBUG_SUSPEND=n"
     depends_on:
       - maxdb
       - jmsserver
@@ -111,6 +123,11 @@ services:
   #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+  #     - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+  #     - "LDAP_PORT=${ENV_LDAP_PORT}"
+  #     - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+  #     - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+  #     - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
@@ -119,7 +136,6 @@ services:
   #     - "9081:9081"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-api.entrypoints=web"
   #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
   #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi`)"
@@ -143,6 +159,11 @@ services:
   #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+  #     - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+  #     - "LDAP_PORT=${ENV_LDAP_PORT}"
+  #     - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+  #     - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+  #     - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
@@ -151,7 +172,6 @@ services:
   #     - "9082:9081"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-report.entrypoints=web"
   #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
   #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport`)"
@@ -175,15 +195,20 @@ services:
   #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+  #     - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+  #     - "LDAP_PORT=${ENV_LDAP_PORT}"
+  #     - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+  #     - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+  #     - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
+  #     - "WLP_DEBUG_SUSPEND=n"
   #   ports:
   #     - "9084:9084"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-mea.entrypoints=web"
   #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
   #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
@@ -239,6 +264,11 @@ services:
   #     - GEN_MAXIMO_PROPERTIES=no
   #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
   #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
+  #     - "LDAP_HOST_NAME=${ENV_LDAP_HOST_NAME}"
+  #     - "LDAP_PORT=${ENV_LDAP_PORT}"
+  #     - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+  #     - "LDAP_BIND_DN=${ENV_LDAP_BIND_DN}"
+  #     - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
   #     - LICENSE=accept
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
@@ -247,7 +277,6 @@ services:
   #     - "9083:9083"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-jmsconsumer.entrypoints=web"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
   #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer`)"
@@ -263,7 +292,7 @@ services:
   #     - maximo:/maximo
 
   jmsserver:
-    image: "${ENV_NAMESPACE}/jmsserver:20.0.0.3-kernel-java8-ibmjava"
+    image: "${ENV_NAMESPACE}/jmsserver:${ENV_WAS_VER}"
     environment:
       - LICENSE=accept
       - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
@@ -276,17 +305,8 @@ services:
     networks:
       - frontend
 
-  # frontend-proxy:
-  #   image: "${ENV_NAMESPACE}/frontend-proxy:1.8"
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     - maximo-ui
-  #   networks:
-  #     - frontend
-
   frontend-proxy:
-    image: traefik:v2.2 # The official v2 Traefik docker image
+    image: traefik:v2.4.8 # The official v2 Traefik docker image
     ports:
       - "80:80"
     command:
@@ -299,6 +319,37 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - frontend
+      - backend
+
+  # ldap:
+  #   image: osixia/openldap:1.5.0
+  #   hostname: "${ENV_LDAP_HOST_NAME}"
+  #   command: --loglevel debug
+  #   environment:
+  #     - LDAP_LOG_LEVEL=256
+  #     - "LDAP_ORGANISATION=${ENV_LDAP_ORGANIZATION}"
+  #     - "LDAP_DOMAIN=${ENV_LDAP_DOMAIN}"
+  #     # - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+  #     # - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
+  #     - "LDAP_CONFIG_PASSWORD=${ENV_LDAP_CONFIG_PASSWORD}"
+  #     - LDAP_READONLY_USER=true
+  #     - "LDAP_READONLY_USER_USERNAME=${ENV_LDAP_USER_NAME}"
+  #     - "LDAP_READONLY_USER_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
+  #     - LDAP_RFC2307BIS_SCHEMA=false
+  #     - LDAP_BACKEND=mdb
+  #     - LDAP_TLS=false
+  #     - LDAP_REPLICATION=false
+  #     - KEEP_EXISTING_CONFIG=false
+  #     - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
+  #   volumes:
+  #     - /var/lib/ldap
+  #     - /etc/ldap/slapd.d
+  #     - /container/service/slapd/assets/certs/
+  #     - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
 
 networks:
   frontend:

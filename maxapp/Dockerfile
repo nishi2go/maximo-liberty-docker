@@ -21,6 +21,7 @@ LABEL maintainer="nishi2go@gmail.com"
 ARG maximoapp=maximo-ui
 
 COPY --chown=1001:0 --from=0 /opt/IBM/SMP/maximo/deployment/was-liberty-default/deployment/${maximoapp}/${maximoapp}-server/ /config/
+COPY --chown=1001:0  --from=0 /work/ldapUserRegistry.xml /config/
 
 RUN installUtility install --acceptLicense defaultServer
 

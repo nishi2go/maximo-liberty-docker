@@ -1,0 +1,43 @@
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>MAXIMO OSLC Provider</web-resource-name>
+        <description>MAXIMO OSLC Provider Security</description>
+        <url-pattern>/oslc/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+        <http-method>PUT</http-method>
+        <http-method>DELETE</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>MAXIMO API Provider</web-resource-name>
+        <description>MAXIMO API Provider Security</description>
+        <url-pattern>/api/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+        <http-method>PUT</http-method>
+        <http-method>DELETE</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+        <web-resource-name>MAXIMO REST</web-resource-name>
+        <description>MAXIMO REST Security</description>
+        <url-pattern>/rest/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+        <http-method>PUT</http-method>
+        <http-method>DELETE</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>Roles that have access to MAXIMO OSLC</description>
+        <role-name>maximouser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+        <description>data transmission gaurantee</description>
+        <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+<env-entry>
+    <description>Web Session Factory Class</description>
+    <env-entry-name>webAppSessionFactoryClassName</env-entry-name>
+    <env-entry-type>java.lang.String</env-entry-type>
+    <env-entry-value>psdi.webclient.system.websession.AppServerWebAppSessionFactory</env-entry-value>
+</env-entry>

@@ -175,6 +175,60 @@ ENV_SKIN=iot18
 ENV_ENABLE_DEMO_DATA=no
 ```
 
+## Enable LDAP/AD support
+
+Maximo has supported LDAP and MS AD to authenticate users a.k.a. Application Server Secuirty on Liberty servers. IBM published the detailed instruction [here](https://www.ibm.com/support/pages/deploying-maximo-liberty-ldap). Maximo on Docker has an automated setup feature to enable it.
+
+Edit the following lines in `.env`. If you want to enable MS Active Directory or any other directory services, edit the `maximo/ldapUserRegistry.xml`. Then build container images.
+
+```properties
+ENV_USE_APP_SERVER_SECURITY=no
+ENV_USER_MANAGEMENT=mixed
+ENV_LDAP_HOST_NAME=ldap
+ENV_LDAP_PORT=389
+ENV_LDAP_BIND_DN=cn=readonly,dc=mydomain,dc=com
+ENV_LDAP_BASE_DN=dc=mydomain,dc=com
+ENV_LDAP_DOMAIN=mydomain.com
+ENV_LDAP_ORGANIZATION="Example Inc."
+ENV_LDAP_USER_NAME=readonly
+ENV_LDAP_ADMIN_PASSWORD=changeit
+ENV_LDAP_CONFIG_PASSWORD=changeit
+```
+
+Uncomment the following lines in `docker-compose.yml` when you want to run a LDAP server inside the container environment. To change the default passwords, edit the `ldap/maximo.ldif` file before running the `docker-compose`.
+
+```yml
+ldap:
+  image: osixia/openldap:1.5.0
+  hostname: "${ENV_LDAP_HOST_NAME}"
+  command: --loglevel debug
+  environment:
+    - LDAP_LOG_LEVEL=256
+    - "LDAP_ORGANISATION=${ENV_LDAP_ORGANIZATION}"
+    - "LDAP_DOMAIN=${ENV_LDAP_DOMAIN}"
+    # - "LDAP_BASE_DN=${ENV_LDAP_BASE_DN}"
+    # - "LDAP_ADMIN_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
+    - "LDAP_CONFIG_PASSWORD=${ENV_LDAP_CONFIG_PASSWORD}"
+    - LDAP_READONLY_USER=true
+    - "LDAP_READONLY_USER_USERNAME=${ENV_LDAP_USER_NAME}"
+    - "LDAP_READONLY_USER_PASSWORD=${ENV_LDAP_ADMIN_PASSWORD}"
+    - LDAP_RFC2307BIS_SCHEMA=false
+    - LDAP_BACKEND=mdb
+    - LDAP_TLS=false
+    - LDAP_REPLICATION=false
+    - KEEP_EXISTING_CONFIG=false
+    - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
+  volumes:
+    - /var/lib/ldap
+    - /etc/ldap/slapd.d
+    - /container/service/slapd/assets/certs/
+    - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+  networks:
+    - backend
+  ports:
+    - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
+```
+
 ## Database deployment on build vs. on runtime.
 
 The database deployment a.k.a maxinst and updatedb will be executed on the docker build time by default. It reduces to the initial start-up time, but longer the build time. When you want to switch the behavior to deploy the database schema on runtime, run the following procedures before building the images.

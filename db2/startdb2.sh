@@ -45,15 +45,15 @@ function initial_setup {
     sudo ${DB2_PATH}/instance/db2rfe -f /work/db2/db2rfe.cfg
 
     echo "Start initial database configurations."
-    if ls ${BACKUPDIR}/${MAXDB}.* > /dev/null 2>&1; then
+    if ls ${BACKUP_DIR}/${MAXDB}.* > /dev/null 2>&1; then
       /bin/bash -c "db2set -null DB2COMM"
       db2start
       until db2gcf -s -t 1 >/dev/null 2>&1; do
         sleep 1
       done
 
-      echo "Restore database ${MAXDB} from ${BACKUPDIR} ..."
-      /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUPDIR} with 4 buffers buffer 2048 replace existing parallelism 3 without prompting && db2 rollforward database ${MAXDB} complete && db2 terminate"
+      echo "Restore database ${MAXDB} from ${BACKUP_DIR} ..."
+      /bin/bash -c "db2 restore database ${MAXDB} from ${BACKUP_DIR} with 4 buffers buffer 2048 replace existing parallelism 3 without prompting && db2 rollforward database ${MAXDB} complete && db2 terminate"
       db2stop
       echo "Done."
     fi

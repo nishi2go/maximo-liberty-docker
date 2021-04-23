@@ -28,6 +28,5 @@ mxe.db.newConnectionCount=3
 mxe.db.transaction_isolation=TRANSACTION_READ_COMMITTED
 mxe.db.format.upper=UPPER
 mxe.db.autocommit=0
-mxe.db.systemdateformat=current timestamp
 mxe.db.format.nullvalue=COALESCE
 mxe.webclient.skin=iot18
