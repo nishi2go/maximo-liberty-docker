@@ -67,7 +67,7 @@ function backup_db {
   mkdir -p ${BACKUP_DIR}
   chown ctginst1.ctggrp1 ${BACKUP_DIR}
   rm ${BACKUP_DIR}/*
- 
+
   su - ctginst1 <<-EOS
     db2 CONNECT TO ${MAXDB}
     db2 QUIESCE DATABASE IMMEDIATE FORCE CONNECTIONS
@@ -94,7 +94,7 @@ if [[ "${ENABLE_DEMO_DATA}" == "yes" ]]; then
   DEMO_DATA="-deployDemoData"
 fi
 
-APP_SECURITY="-disableappsecurity"
+APP_SECURITY=""
 if [[ "${USE_APP_SERVER_SECURITY}" == "yes" ]]; then
   APP_SECURITY="-enableappsecurity -usermanagement ${USER_MANAGEMENT}"
 fi
