@@ -75,13 +75,16 @@ services:
       - "WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc,audit"
       - "MXE_CRONTASK_DONOTRUN=ALL"
       - "WLP_DEBUG_SUSPEND=n"
-    ports:
-      - "9080:9080"
+    #    ports:
+    #      - "9080:9080"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.maximo-ui.entrypoints=web"
       - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
       - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo`) || PathPrefix(`/maximo-x`)"
+      - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
+      - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
+      - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
     depends_on:
       - maxdb
       - jmsserver
@@ -147,6 +150,9 @@ services:
   #     - "traefik.http.routers.maximo-api.entrypoints=web"
   #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
   #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi`)"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -184,6 +190,9 @@ services:
   #     - "traefik.http.routers.maximo-report.entrypoints=web"
   #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
   #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport`)"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -222,6 +231,9 @@ services:
   #     - "traefik.http.routers.maximo-mea.entrypoints=web"
   #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
   #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -259,6 +271,9 @@ services:
   #     - "traefik.http.routers.maximo-jmsconsumer.entrypoints=web"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
   #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer`)"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
