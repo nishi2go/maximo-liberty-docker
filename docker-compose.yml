@@ -8,8 +8,8 @@ services:
       - "MAXDB_SERVICE_PORT=${ENV_MAXDB_SERVICE_PORT}"
     networks:
       - backend
-    ports:
-      - "${ENV_MAXDB_SERVICE_PORT}:${ENV_MAXDB_SERVICE_PORT}"
+    # ports:
+    #   - "${ENV_MAXDB_SERVICE_PORT}:${ENV_MAXDB_SERVICE_PORT}"
     ulimits:
       nproc: 8192
       nofile: 65535
@@ -80,8 +80,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.maximo-ui.entrypoints=web"
-      - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
+      - "traefik.http.routers.maximo-ui.service=maximo-ui"
       - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo`) || PathPrefix(`/maximo-x`)"
+      - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
@@ -143,16 +144,17 @@ services:
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
-  #   ports:
-  #     - "9081:9081"
+  #   #ports:
+  #   #  - "9081:9081"
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-api.entrypoints=web"
-  #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
+  #     - "traefik.http.routers.maximo-api.service=maximo-api"
   #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi`)"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
+  #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
+  #     - "traefik.http.services.maximo-api.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-api.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-api.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -183,16 +185,17 @@ services:
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
-  #   ports:
-  #     - "9082:9081"
+  #   #ports:
+  #   #  - "9082:9082"
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-report.entrypoints=web"
-  #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
+  #     - "traefik.http.routers.maximo-report.service=maximo-report"
   #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport`)"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
+  #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
+  #     - "traefik.http.services.maximo-report.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-report.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-report.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -224,16 +227,17 @@ services:
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
   #     - "WLP_DEBUG_SUSPEND=n"
-  #   ports:
-  #     - "9084:9084"
+  #   #ports:
+  #   #  - "9084:9084"
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-mea.entrypoints=web"
-  #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
+  #     - "traefik.http.routers.maximo-mea.service=maximo-meaweb"
   #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -264,16 +268,17 @@ services:
   #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
-  #   ports:
-  #     - "9083:9083"
+  #   #ports:
+  #   #  - "9083:9083"
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-jmsconsumer.entrypoints=web"
-  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
+  #     - "traefik.http.routers.maximo-jmsconsumer.service=maximo-jmsconsumer"
   #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer`)"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
-  #     - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
+  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
+  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
@@ -293,11 +298,11 @@ services:
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - "MAXIMO_JMS_SERVICE_SSL_PORT=${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     hostname: "${ENV_MAXIMO_JMS_SERVICE_HOST}"
-    ports:
-      - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
-      - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
+    #ports:
+    #  - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
+    #  - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     networks:
-      - frontend
+      - maximo
 
   frontend-proxy:
     image: traefik:v2.4.8 # The official v2 Traefik docker image
@@ -341,9 +346,9 @@ services:
   #     - /container/service/slapd/assets/certs/
   #     - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
   #   networks:
-  #     - backend
-  #   ports:
-  #     - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
+  #     - maximo
+  #   #ports:
+  #   #  - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
 
 networks:
   frontend:
