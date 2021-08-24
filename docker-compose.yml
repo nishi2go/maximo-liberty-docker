@@ -298,11 +298,11 @@ services:
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - "MAXIMO_JMS_SERVICE_SSL_PORT=${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     hostname: "${ENV_MAXIMO_JMS_SERVICE_HOST}"
-    #ports:
-    #  - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
-    #  - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
+    # ports:
+    #   - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
+    #   - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     networks:
-      - maximo
+      - frontend
 
   frontend-proxy:
     image: traefik:v2.4.8 # The official v2 Traefik docker image
@@ -346,7 +346,7 @@ services:
   #     - /container/service/slapd/assets/certs/
   #     - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
   #   networks:
-  #     - maximo
+  #     - backend
   #   #ports:
   #   #  - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
 
