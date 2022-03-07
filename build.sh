@@ -149,7 +149,6 @@ fi
 
 cd `dirname "${0}"`
 
-
 if [[ ${REMOVE} -eq 1 ]]; then
   echo "Remove old images..."
   remove "jmsserver" "${WAS_VER}" "IBM WebSphere Application Server Liberty JMS server"
@@ -193,7 +192,7 @@ do
       DEFAULT_BUILD_ARGS+="--build-arg ${key}=${value} "
     fi
   fi
-done < <(sed --expression='/^#/d' --expression='/^$/d' "${DEFAULT_BUILD_ARGS_FILE}")
+done < <(sed -e '/^#/d' -e '/^$/d' "${DEFAULT_BUILD_ARGS_FILE}")
 
 if [[ ${DEPLOY_ON_BUILD} -eq -1 ]]; then
   DEPLOY_ON_BUILD=1
