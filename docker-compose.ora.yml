@@ -1,4 +1,5 @@
-version: "3.6"
+version: "3.7"
+
 services:
   maxdb:
     image: oracle/database:18.4.0-xe
@@ -23,6 +24,9 @@ services:
     image: "${ENV_NAMESPACE}/maximo:${ENV_MAXIMO_VER}"
     environment:
       - DB_VENDOR=Oracle
+      - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+      - "MXE_DB_FORMAT_NULLVALUE=NVL"
+      - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
       - "MXINTADM_PASSWORD=${ENV_MXINTADM_PASSWORD}"
       - "MAXADMIN_PASSWORD=${ENV_MAXADMIN_PASSWORD}"
       - "MAXREG_PASSWORD=${ENV_MAXREG_PASSWORD}"
@@ -51,6 +55,10 @@ services:
   maximo-ui:
     image: "${ENV_NAMESPACE}/maximo-ui:${ENV_MAXIMO_VER}"
     environment:
+      - DB_VENDOR=Oracle
+      - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+      - "MXE_DB_FORMAT_NULLVALUE=NVL"
+      - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
       - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
       - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
       - GEN_MAXIMO_PROPERTIES=no
@@ -67,15 +75,16 @@ services:
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - "WLP_LOGGING_CONSOLE_LOGLEVEL=info"
       - "WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc,audit"
-      - "MXE_CRONTASK_DONOTRUN=ALL"
       - "WLP_DEBUG_SUSPEND=n"
+      - "MXE_CRONTASK_DONOTRUN=ALL"
     #ports:
     #  - "9080:9080"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.maximo-ui.entrypoints=web"
-      - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
+      - "traefik.http.routers.maximo-ui.service=maximo-ui"
       - "traefik.http.routers.maximo-ui.rule=PathPrefix(`/maximo`) || PathPrefix(`/maximo-x`)"
+      - "traefik.http.services.maximo-ui.loadbalancer.server.port=9080"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky=true"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.name=StickyCookie"
       - "traefik.http.services.maximo-ui.loadbalancer.sticky.cookie.secure=true"
@@ -93,6 +102,10 @@ services:
   maximo-cron:
     image: "${ENV_NAMESPACE}/maximo-cron:${ENV_MAXIMO_VER}"
     environment:
+      - DB_VENDOR=Oracle
+      - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+      - "MXE_DB_FORMAT_NULLVALUE=NVL"
+      - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
       - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
       - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
       - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
@@ -120,6 +133,10 @@ services:
   # maximo-api:
   #   image: "${ENV_NAMESPACE}/maximo-api:${ENV_MAXIMO_VER}"
   #   environment:
+  #     - DB_VENDOR=Oracle
+  #     - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+  #     - "MXE_DB_FORMAT_NULLVALUE=NVL"
+  #     - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
   #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
@@ -140,8 +157,9 @@ services:
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-api.entrypoints=web"
-  #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
+  #     - "traefik.http.routers.maximo-api.service=maximo-api"
   #     - "traefik.http.routers.maximo-api.rule=PathPrefix(`/maximoapi`)"
+  #     - "traefik.http.services.maximo-api.loadbalancer.server.port=9081"
   #     - "traefik.http.services.maximo-api.loadbalancer.sticky=true"
   #     - "traefik.http.services.maximo-api.loadbalancer.sticky.cookie.name=StickyCookie"
   #     - "traefik.http.services.maximo-api.loadbalancer.sticky.cookie.secure=true"
@@ -159,6 +177,10 @@ services:
   # maximo-report:
   #   image: "${ENV_NAMESPACE}/maximo-report:${ENV_MAXIMO_VER}"
   #   environment:
+  #     - DB_VENDOR=Oracle
+  #     - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+  #     - "MXE_DB_FORMAT_NULLVALUE=NVL"
+  #     - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
   #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
@@ -179,8 +201,9 @@ services:
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-report.entrypoints=web"
-  #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
+  #     - "traefik.http.routers.maximo-report.service=maximo-report"
   #     - "traefik.http.routers.maximo-report.rule=PathPrefix(`/maximoreport`)"
+  #     - "traefik.http.services.maximo-report.loadbalancer.server.port=9082"
   #     - "traefik.http.services.maximo-report.loadbalancer.sticky=true"
   #     - "traefik.http.services.maximo-report.loadbalancer.sticky.cookie.name=StickyCookie"
   #     - "traefik.http.services.maximo-report.loadbalancer.sticky.cookie.secure=true"
@@ -198,6 +221,10 @@ services:
   # maximo-mea:
   #   image: "${ENV_NAMESPACE}/maximo-mea:${ENV_MAXIMO_VER}"
   #   environment:
+  #     - DB_VENDOR=Oracle
+  #     - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+  #     - "MXE_DB_FORMAT_NULLVALUE=NVL"
+  #     - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
   #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
@@ -214,52 +241,24 @@ services:
   #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
   #     - MXE_CRONTASK_DONOTRUN=ALL
   #     - "WLP_DEBUG_SUSPEND=n"
-  #   ports:
-  #     - "9084:9084"
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.maximo-mea.entrypoints=web"
-  #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
-  #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
-  #   depends_on:
-  #     - maxdb
-  #     - jmsserver
-  #   networks:
-  #     frontend:
-  #       aliases:
-  #        - maximo-mea
-  #     backend:
-  #   volumes:
-  #     - maximo:/maximo
-
-  # maximo-mea:
-  #   image: "${ENV_NAMESPACE}/maximo-mea:${ENV_MAXIMO_VER}"
-  #   environment:
-  #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
-  #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
-  #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
-  #     - GEN_MAXIMO_PROPERTIES=no
-  #     - "ADMIN_USER_NAME=${ENV_ADMIN_USER_NAME}"
-  #     - "ADMIN_PASSWORD=${ENV_ADMIN_PASSWORD}"
-  #     - LICENSE=accept
-  #     - "MAXIMO_JMS_SERVICE_HOST=${ENV_MAXIMO_JMS_SERVICE_HOST}"
-  #     - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
-  #     - MXE_CRONTASK_DONOTRUN=ALL
   #   #ports:
   #   #  - "9084:9084"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.docker.network=maximo-docker-liberty_frontend"
   #     - "traefik.http.routers.maximo-mea.entrypoints=web"
-  #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
+  #     - "traefik.http.routers.maximo-mea.service=maximo-meaweb"
   #     - "traefik.http.routers.maximo-mea.rule=PathPrefix(`/meaweb`)"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.server.port=9084"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky=true"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky.cookie.name=StickyCookie"
+  #     - "traefik.http.services.maximo-mea.loadbalancer.sticky.cookie.secure=true"
   #   depends_on:
   #     - maxdb
   #     - jmsserver
   #   networks:
   #     frontend:
   #       aliases:
-  #        - maximo-mea
+  #         - maximo-mea
   #     backend:
   #   volumes:
   #     - maximo:/maximo
@@ -267,6 +266,10 @@ services:
   # maximo-jmsconsumer:
   #   image: "${ENV_NAMESPACE}/maximo-jmsconsumer:${ENV_MAXIMO_VER}"
   #   environment:
+  #     - DB_VENDOR=Oracle
+  #     - "MXE_DB_DRIVER=oracle.jdbc.OracleDriver"
+  #     - "MXE_DB_FORMAT_NULLVALUE=NVL"
+  #     - "MXE_DB_SYSTEMDATEFORMAT=sysdate"
   #     - "MAXDB_SERVICE_PORT=${ENV_ORACLE_DB_PORT}"
   #     - "MAXDB_SERVICE_HOST=${ENV_MAXDB_SERVICE_HOST}"
   #     - "DB_MAXIMO_PASSWORD=${ENV_DB_MAXIMO_PASSWORD}"
@@ -287,8 +290,9 @@ services:
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.maximo-jmsconsumer.entrypoints=web"
-  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
+  #     - "traefik.http.routers.maximo-jmsconsumer.service=maximo-jmsconsumer"
   #     - "traefik.http.routers.maximo-jmsconsumer.rule=PathPrefix(`/maximojmsconsumer`)"
+  #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.server.port=9083"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky=true"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky.cookie.name=StickyCookie"
   #     - "traefik.http.services.maximo-jmsconsumer.loadbalancer.sticky.cookie.secure=true"
@@ -311,9 +315,9 @@ services:
       - "MAXIMO_JMS_SERVICE_PORT=${ENV_MAXIMO_JMS_SERVICE_PORT}"
       - "MAXIMO_JMS_SERVICE_SSL_PORT=${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     hostname: "${ENV_MAXIMO_JMS_SERVICE_HOST}"
-    ports:
-      - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
-      - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
+    # ports:
+    #   - "${ENV_MAXIMO_JMS_SERVICE_PORT}:${ENV_MAXIMO_JMS_SERVICE_PORT}"
+    #   - "${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}:${ENV_MAXIMO_JMS_SERVICE_SSL_PORT}"
     networks:
       - frontend
 
@@ -360,8 +364,8 @@ services:
   #     - ./ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
   #   networks:
   #     - backend
-  #   ports:
-  #     - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
+  #   #ports:
+  #   #  - "${ENV_LDAP_PORT}:${ENV_LDAP_PORT}"
 
 networks:
   frontend:

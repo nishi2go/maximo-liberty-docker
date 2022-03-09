@@ -302,7 +302,7 @@ Oracle database containers are officially provided by Oracle from the [repositor
 7. Run the Oracle container by using the Docker Compose file to create and deploy the database instance first:
 
    ```bash
-   docker-compose -f docker-compose.ora.yml -d maxdb
+   docker-compose -f docker-compose.ora.yml up -d maxdb
    ```
 
    Wait until the text "`DATABASE IS READY TO USE!`" is shown in the logs.
@@ -314,7 +314,7 @@ Oracle database containers are officially provided by Oracle from the [repositor
 8. Run the Maximo container to deploy the database schema to Oracle database.
 
    ```bash
-   docker-compose -f docker-compose.ora.yml -d maximo
+   docker-compose -f docker-compose.ora.yml up -d maximo
    ```
 
    Wait until the text "`CTGIN5012I: The reconfiguration action updateApplicationDBLite completed successfully.`" is shown in the logs.
@@ -323,9 +323,10 @@ Oracle database containers are officially provided by Oracle from the [repositor
    docker-compose -f docker-compose.ora.yml logs -f maximo
    ```
 
-   Note: It will take 3-4 hours (depend on your machine) to complete the installation.
+   Note: It will take 3-4 hours (depend on your machine spec) to complete the installation.
 
 9. Run the all other containers:
+
    ```bash
    docker-compose -f docker-compose.ora.yml up -d
    ```
